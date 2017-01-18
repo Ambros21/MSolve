@@ -72,6 +72,12 @@ namespace ISAAR.MSolve.PreProcessor.Elements
                 materialsAtGaussPoints[i] = (IFiniteElementMaterial3D)material.Clone();
         }
 
+        public Hexa8(IFiniteElementMaterial3D[] materials)
+        {
+            for (int i = 0; i < iInt3; i++)
+                materialsAtGaussPoints[i] = materials[i];
+        }
+
         public Hexa8(IFiniteElementMaterial3D material, IFiniteElementDOFEnumerator dofEnumerator)
             : this(material)
         {
@@ -329,7 +335,7 @@ namespace ISAAR.MSolve.PreProcessor.Elements
             return shapeFunctionDerivatives;
         }
 
-        private GaussLegendrePoint3D[] CalculateGaussMatrices(double[,] nodeCoordinates)
+        public GaussLegendrePoint3D[] CalculateGaussMatrices(double[,] nodeCoordinates)
         {
             GaussLegendrePoint1D[] integrationPointsPerAxis =
                 GaussQuadrature.GetGaussLegendrePoints(iInt);
