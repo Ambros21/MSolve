@@ -2065,7 +2065,7 @@ namespace ISAAR.MSolve.PreProcessor.Materials
                 QH[3] = 1;
                 if (RR<1)
                 {
-                    bload(PAR,DD, QH, Stresses);
+                    Stresses=bload(PAR,DD, QH, Stresses);
                 }
             }
             this.QH = QH;
@@ -2120,7 +2120,7 @@ namespace ISAAR.MSolve.PreProcessor.Materials
                 {
                     QH[7 + i] = Stresses[i];
                 }
-                load(PAR, DD1, QH, Stresses);
+                Stresses=load(PAR, DD1, QH, Stresses);
             }
             this.QH = QH;
             return Stresses;
