@@ -45,7 +45,7 @@ namespace ISAAR.MSolve.PreProcessor
         //public IFiniteElementMaterial MaterialType { get; set; }
         public Subdomain Subdomain { get; set; }
         public int[] DOFs { get; set; }
-
+        public double[] initialForces = new double[24]; //needed to be intered for having the ability to enter the initial forces.
         public void AddNode(Node node)
         {
             nodesDictionary.Add(node.ID, node);

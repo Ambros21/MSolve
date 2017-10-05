@@ -16,7 +16,7 @@ namespace ISAAR.MSolve.Analyzers
         private readonly int increments;
         private readonly int totalDOFs;
         private readonly int maxSteps = 120;
-        private readonly int stepsForMatrixRebuild = 500;
+        private readonly int stepsForMatrixRebuild = 1;
         private readonly double tolerance = 1e-5;
         private double rhsNorm;
         private INonLinearParentAnalyzer parentAnalyzer = null;
@@ -120,14 +120,13 @@ namespace ISAAR.MSolve.Analyzers
             {
                 Vector<double> subdomainRHS = ((Vector<double>)subdomain.RHS);
                 rhs[subdomain.ID].CopyTo(subdomainRHS.Data, 0);
-                subdomainRHS.Multiply(step + 1);
+                //subdomainRHS.Multiply(step + 1); erased it in order to have at first iteration RHS=Fn+1-Fn            
             }
         }
 
         public void Solve()
         {
             InitializeLogs();
-
             DateTime start = DateTime.Now;
             UpdateInternalVectors();
             for (int increment = 0; increment < increments; increment++)

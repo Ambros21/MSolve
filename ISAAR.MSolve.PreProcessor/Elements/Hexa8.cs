@@ -35,17 +35,30 @@ namespace ISAAR.MSolve.PreProcessor.Elements
         [DllImport("femelements.dll",
             EntryPoint = "CALCH8STRAINS",
             CallingConvention = CallingConvention.Cdecl)]
-        protected static extern void CalcH8Strains(ref int iInt,
+        private static extern void CalcH8Strains(ref int iInt,
             [MarshalAs(UnmanagedType.LPArray)]double[,,] faB, [MarshalAs(UnmanagedType.LPArray)]double[] fau,
             [MarshalAs(UnmanagedType.LPArray)]double[,] faStrains);
 
         [DllImport("femelements.dll",
             EntryPoint = "CALCH8FORCES",
             CallingConvention = CallingConvention.Cdecl)]
-        protected static extern void CalcH8Forces(ref int iInt,
+        private static extern void CalcH8Forces(ref int iInt,
             [MarshalAs(UnmanagedType.LPArray)]double[,,] faB, [MarshalAs(UnmanagedType.LPArray)]double[] faWeight,
             [MarshalAs(UnmanagedType.LPArray)]double[,] faStresses,
             [MarshalAs(UnmanagedType.LPArray)]double[] faForces);
+
+        [DllImport("femelements.dll",
+            EntryPoint = "CALCH20U8PFORCESWATERACC",
+            CallingConvention = CallingConvention.Cdecl)]
+        private static extern void CalcH20u8pForcesWaterAcc(ref int iInt,
+            [MarshalAs(UnmanagedType.LPArray)]bool[] alImpermeable, ref double ffDensity,
+            [MarshalAs(UnmanagedType.LPArray)]double[] afPermeability,
+            [MarshalAs(UnmanagedType.LPArray)]double[] afXw,
+            [MarshalAs(UnmanagedType.LPArray)]double[] afSw,
+            [MarshalAs(UnmanagedType.LPArray)]double[] afAcc,
+            [MarshalAs(UnmanagedType.LPArray)]double[,] afS,
+            [MarshalAs(UnmanagedType.LPArray)]double[,,] afB, [MarshalAs(UnmanagedType.LPArray)]double[] afWeights,
+            [MarshalAs(UnmanagedType.LPArray)]double[] afLocalForces);
 
         [DllImport("femelements.dll",
             EntryPoint = "CALCH8K",
@@ -57,10 +70,32 @@ namespace ISAAR.MSolve.PreProcessor.Elements
         [DllImport("femelements.dll",
             EntryPoint = "CALCH8MLUMPED",
             CallingConvention = CallingConvention.Cdecl)]
-        protected static extern void CalcH8MLumped(ref int iInt, ref double fDensity,
+        private static extern void CalcH8MLumped(ref int iInt, ref double fDensity,
             [MarshalAs(UnmanagedType.LPArray)]double[] faWeight, [MarshalAs(UnmanagedType.LPArray)]double[] faM);
-        #endregion
 
+        [DllImport("femelements.dll",
+            EntryPoint = "CALCH20U8PH",
+            CallingConvention = CallingConvention.Cdecl)]
+        private static extern void CalcH20u8pH(ref int iInt, [MarshalAs(UnmanagedType.LPArray)]double[] faPermeability,
+            [MarshalAs(UnmanagedType.LPArray)]double[,] faS, [MarshalAs(UnmanagedType.LPArray)]double[,,] faB,
+            [MarshalAs(UnmanagedType.LPArray)]double[] faWeight, [MarshalAs(UnmanagedType.LPArray)]double[] faH);
+
+        [DllImport("femelements.dll",
+            EntryPoint = "CALCH20U8PS",
+            CallingConvention = CallingConvention.Cdecl)]
+        private static extern void CalcH20u8pS(ref int iInt, [MarshalAs(UnmanagedType.LPArray)]double[] faXwDivQ,
+            [MarshalAs(UnmanagedType.LPArray)]double[,] faS,
+            [MarshalAs(UnmanagedType.LPArray)]double[] faWeight, [MarshalAs(UnmanagedType.LPArray)]double[] faM);
+
+        [DllImport("femelements.dll",
+            EntryPoint = "CALCH8U8PQMINUS",
+            CallingConvention = CallingConvention.Cdecl)]
+        private static extern void CalcH8u8pQMinus(ref int iInt, ref double fPoreA,
+            [MarshalAs(UnmanagedType.LPArray)]double[] faXw,
+            [MarshalAs(UnmanagedType.LPArray)]double[,,] faB, [MarshalAs(UnmanagedType.LPArray)]double[,] faS,
+            [MarshalAs(UnmanagedType.LPArray)]double[] faWeight, [MarshalAs(UnmanagedType.LPArray)]double[,] faQ);
+
+        #endregion
         protected Hexa8()
         {
         }
@@ -74,6 +109,7 @@ namespace ISAAR.MSolve.PreProcessor.Elements
 
         public Hexa8(IFiniteElementMaterial3D[] materials)
         {
+            materialsAtGaussPoints = new IFiniteElementMaterial3D[iInt3];
             for (int i = 0; i < iInt3; i++)
                 materialsAtGaussPoints[i] = materials[i];
         }
@@ -140,7 +176,7 @@ namespace ISAAR.MSolve.PreProcessor.Elements
             return element.Nodes;
         }
 
-        private double[] CalcH8Shape(double fXi, double fEta, double fZeta)
+        public double[] CalcH8Shape(double fXi, double fEta, double fZeta)
         {
             const double fSqC125 = 0.5;
             double fXiP = (1.0 + fXi) * fSqC125;
@@ -459,14 +495,24 @@ namespace ISAAR.MSolve.PreProcessor.Elements
         public Tuple<double[], double[]> CalculateStresses(Element element, double[] localDisplacements, double[] localdDisplacements)
         {
             double[,] faXYZ = GetCoordinates(element);
+            //GaussLegendrePoint3D[] GaussMatrices = CalculateGaussMatrices(faXYZ);
             double[,] faDS = new double[iInt3, 24];
             double[,] faS = new double[iInt3, 8];
             double[, ,] faB = new double[iInt3, 24, 6];
+            //double[,] faB = new double[24, 6];
             double[] faDetJ = new double[iInt3];
-            double[, ,] faJ = new double[iInt3, 3, 3];
+            double[,,] faJ = new double[iInt3, 3, 3];
             double[] faWeight = new double[iInt3];
             double[,] fadStrains = new double[iInt3, 6];
             double[,] faStrains = new double[iInt3, 6];
+            //for (int i = 0; i < iInt3; i++)
+            //{ faB = GaussMatrices[i].DeformationMatrix;
+            //    for (int j = 0; j < 24;j++) 
+            //    for (int k = 0; k < 6; k++) 
+            //    {
+            //        faStrains[i, k] = faStrains[i, k] + faB[j, k] * localDisplacements[k];
+            //        fadStrains[i, k] = fadStrains[i, k] + faB[j, k]*localdDisplacements[k]; }
+            //}
             CalcH8GaussMatrices(ref iInt, faXYZ, faWeight, faS, faDS, faJ, faDetJ, faB);
             CalcH8Strains(ref iInt, faB, localDisplacements, faStrains);
             CalcH8Strains(ref iInt, faB, localdDisplacements, fadStrains);
@@ -502,16 +548,26 @@ namespace ISAAR.MSolve.PreProcessor.Elements
                 for (int j = 0; j < 6; j++) faStresses[i, j] = materialsAtGaussPoints[i].Stresses[j];
 
             double[,] faXYZ = GetCoordinates(element);
+            //GaussLegendrePoint3D[] GaussMatrices=CalculateGaussMatrices(faXYZ);
             double[,] faDS = new double[iInt3, 24];
             double[,] faS = new double[iInt3, 8];
             double[, ,] faB = new double[iInt3, 24, 6];
+            //double[,] faB = new double[24, 6];
             double[] faDetJ = new double[iInt3];
             double[, ,] faJ = new double[iInt3, 3, 3];
             double[] faWeight = new double[iInt3];
+            //double faWeight =0.0;
             double[] faForces = new double[24];
+            //for (int i = 0; i < iInt3; i++)
+            //{
+            //    faWeight = GaussMatrices[i].WeightFactor;
+            //    faB = GaussMatrices[i].DeformationMatrix;
+            //    for (int j = 0; j < 24; j++)
+            //        for (int k = 0; k < 6; k++)
+            //        { faForces[j] = faForces[j] + faWeight * faB[j, k] * faStresses[i, k]; }
+            //}
             CalcH8GaussMatrices(ref iInt, faXYZ, faWeight, faS, faDS, faJ, faDetJ, faB);
             CalcH8Forces(ref iInt, faB, faWeight, faStresses, faForces);
-
             return faForces;
         }
 

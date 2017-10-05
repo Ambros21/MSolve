@@ -15,7 +15,6 @@
         private readonly double determinant;
 
         private readonly double[,] matrix;
-
         #endregion
 
         #region Constructors and Destructors
@@ -45,7 +44,6 @@
                 return this.matrix;
             }
         }
-
         #endregion
 
         #region Public Methods
