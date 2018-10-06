@@ -102,7 +102,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Cluster.cs" />
+    <Compile Include="Elements\Fiber.cs" />
+    <Compile Include="Elements\FiberBeam3D.cs" />
     <Compile Include="Elements\Hexa8u8pWithStochasticMaterial.cs" />
+    <Compile Include="Elements\SupportiveClasses\GaussLobatto.cs" />
     <Compile Include="Interfaces\IMassAccelerationHistoryLoad.cs" />
     <Compile Include="MassAccelerationSinusoidalLoad.cs" />
     <Compile Include="Elements\ConcentratedMass3D.cs" />
@@ -113,6 +116,8 @@
     <Compile Include="Embedding\Hexa8TranslationAndRotationTransformationVector.cs" />
     <Compile Include="Embedding\ElementEmbedder.cs" />
     <Compile Include="Materials\KavvadasClays.cs" />
+    <Compile Include="Materials\SteelFiberElementMaterial.cs" />
+    <Compile Include="Materials\SteelFiberMaterial.cs" />
     <Compile Include="Stochastic\GaussianPCFileStochasticCoefficientsProvider.cs" />
     <Compile Include="GenericDOFEnumerator.cs" />
     <Compile Include="Embedding\Hexa8TranslationTransformationVector.cs" />

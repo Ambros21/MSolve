@@ -38,7 +38,10 @@ namespace ISAAR.MSolve.Analyzers
 
         public Dictionary<int, LinearAnalyzerLogFactory> LogFactories { get { return logFactories; } }
         public ISolver Solver { get { return solver; } }
+        public void Solve(int h, int j)
+        {
 
+        }
         #region IAnalyzer Members
 
         public Dictionary<int, IAnalyzerLog[]> Logs { get { return logs; } }

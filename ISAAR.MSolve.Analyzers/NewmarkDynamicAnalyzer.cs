@@ -289,7 +289,7 @@ namespace ISAAR.MSolve.Analyzers
                 // ProcessRHS
                 CalculateRHSImplicit();
                 DateTime start = DateTime.Now;
-                childAnalyzer.Solve();
+                childAnalyzer.Solve(i,(int)(totalTime/timeStep)); // this was in order to have a proper dynamic solver in newton raphson
                 DateTime end = DateTime.Now;
                 UpdateVelocityAndAcceleration();
                 UpdateResultStorages(start, end);
@@ -297,7 +297,10 @@ namespace ISAAR.MSolve.Analyzers
             
             //childAnalyzer.Solve();
         }
+        public void Solve(int h, int j)
+        {
 
+        }
         private void UpdateVelocityAndAcceleration()
         {
             foreach (ISolverSubdomain subdomain in subdomains.Values)

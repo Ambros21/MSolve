@@ -123,7 +123,10 @@ namespace ISAAR.MSolve.Analyzers
                 //subdomainRHS.Multiply(step + 1); erased it in order to have at first iteration RHS=Fn+1-Fn            
             }
         }
+        public void Solve(int h, int j)
+        {
 
+        }
         public void Solve()
         {
             InitializeLogs();

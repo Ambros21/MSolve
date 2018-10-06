@@ -112,19 +112,19 @@ namespace ISAAR.MSolve.PreProcessor.Materials
         public KavvadasClays(double youngModulus, double poissonRatio, double alpha, double ksi, double[] initialStresses) : this(youngModulus, poissonRatio, alpha, ksi)
         {
                 // if alpha=1 this is a stochastic use and we imply youngModulus and poissonRatio for giving the stochastic values.
-                var gamma = 20;
+                var gamma = 10; //effective stress
                 Zeta = -initialStresses[2] / gamma; // the initialization of the stresses should be in the model class HexaSoil2.cs
                 if (alpha==1)
                    {
-                Kmax = 0.008686;
-                Kmin = youngModulus * Kmax;
+                Kmax = youngModulus * 0.008686;
+                Kmin = youngModulus * 0.008686;
                     }
                 else
                   {
                  Kmax = 0.001;
                  Kmin = 0.001;
                  }                
-                var Htot = 50;
+                var Htot = 20;
                 var Niso = 2.15;//2.08053; //Note that 2*astar is related with the Initial Stresses in X and Y axes (SX=(2*astar-gamma*zeta)/2 for OCR=3)
                 this.Stresses = new double[6];
                 this.PAR = new double[20];
@@ -205,6 +205,8 @@ namespace ISAAR.MSolve.PreProcessor.Materials
                 this.elasticConstitutiveMatrix[3, 3] = g;
                 this.elasticConstitutiveMatrix[4, 4] = g;
                 this.elasticConstitutiveMatrix[5, 5] = g;
+                this.PoissonRatio = (3 - PAR[1]) / (6 + PAR[1]);
+                this.YoungModulus = 3 * (1 - 2 * PoissonRatio) * xk;
                 this.ConstitutiveMatrix = new Matrix2D<double>(this.elasticConstitutiveMatrix);
                 this.initialStresses = initialStresses;
                 stressesNew = new double[6];
@@ -482,6 +484,8 @@ namespace ISAAR.MSolve.PreProcessor.Materials
                     this.elasticConstitutiveMatrix[3, 3] += g / ndiv;
                     this.elasticConstitutiveMatrix[4, 4] += g / ndiv;
                     this.elasticConstitutiveMatrix[5, 5] += g / ndiv;
+                    this.PoissonRatio = (3 - PAR[1]) / (6 + PAR[1]);
+                    this.YoungModulus = 3 * (1 - 2 * PoissonRatio) * xk;
                 }
                 this.ConstitutiveMatrix = TransformationForJacobianMatrix(this.ConstitutiveMatrix);
             }
@@ -529,6 +533,8 @@ namespace ISAAR.MSolve.PreProcessor.Materials
                 this.elasticConstitutiveMatrix[3, 3] = g;
                 this.elasticConstitutiveMatrix[4, 4] = g;
                 this.elasticConstitutiveMatrix[5, 5] = g;
+                this.PoissonRatio = (3 - PAR[1]) / (6 + PAR[1]);
+                this.YoungModulus = 3 * (1 - 2 * PoissonRatio) * xk;
             }
             Stresses = TransformToStandardStresses(Stresses);
             de = TransformToStandardStrains(de);

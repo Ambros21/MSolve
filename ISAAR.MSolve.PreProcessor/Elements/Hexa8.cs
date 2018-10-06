@@ -20,7 +20,7 @@ namespace ISAAR.MSolve.PreProcessor.Elements
         protected readonly static DOFType[] nodalDOFTypes = new DOFType[] { DOFType.X, DOFType.Y, DOFType.Z };
         protected readonly static DOFType[][] dofTypes = new DOFType[][] { nodalDOFTypes, nodalDOFTypes, nodalDOFTypes,
             nodalDOFTypes, nodalDOFTypes, nodalDOFTypes, nodalDOFTypes, nodalDOFTypes };
-        protected readonly IFiniteElementMaterial3D[] materialsAtGaussPoints;
+        public readonly IFiniteElementMaterial3D[] materialsAtGaussPoints; //was protected readonly and is ok
         protected IFiniteElementDOFEnumerator dofEnumerator = new GenericDOFEnumerator();
 
         #region Fortran imports
@@ -175,7 +175,6 @@ namespace ISAAR.MSolve.PreProcessor.Elements
         {
             return element.Nodes;
         }
-
         public double[] CalcH8Shape(double fXi, double fEta, double fZeta)
         {
             const double fSqC125 = 0.5;
@@ -498,7 +497,7 @@ namespace ISAAR.MSolve.PreProcessor.Elements
             //GaussLegendrePoint3D[] GaussMatrices = CalculateGaussMatrices(faXYZ);
             double[,] faDS = new double[iInt3, 24];
             double[,] faS = new double[iInt3, 8];
-            double[, ,] faB = new double[iInt3, 24, 6];
+            double[,,] faB = new double[iInt3, 24, 6];
             //double[,] faB = new double[24, 6];
             double[] faDetJ = new double[iInt3];
             double[,,] faJ = new double[iInt3, 3, 3];
@@ -529,6 +528,7 @@ namespace ISAAR.MSolve.PreProcessor.Elements
             return new Tuple<double[], double[]>(strains, materialsAtGaussPoints[materialsAtGaussPoints.Length - 1].Stresses);
         }
 
+
         public double[] CalculateForcesForLogging(Element element, double[] localDisplacements)
         {
             return CalculateForces(element, localDisplacements, new double[localDisplacements.Length]);
@@ -551,10 +551,10 @@ namespace ISAAR.MSolve.PreProcessor.Elements
             //GaussLegendrePoint3D[] GaussMatrices=CalculateGaussMatrices(faXYZ);
             double[,] faDS = new double[iInt3, 24];
             double[,] faS = new double[iInt3, 8];
-            double[, ,] faB = new double[iInt3, 24, 6];
+            double[,,] faB = new double[iInt3, 24, 6];
             //double[,] faB = new double[24, 6];
             double[] faDetJ = new double[iInt3];
-            double[, ,] faJ = new double[iInt3, 3, 3];
+            double[,,] faJ = new double[iInt3, 3, 3];
             double[] faWeight = new double[iInt3];
             //double faWeight =0.0;
             double[] faForces = new double[24];
@@ -570,7 +570,6 @@ namespace ISAAR.MSolve.PreProcessor.Elements
             CalcH8Forces(ref iInt, faB, faWeight, faStresses, faForces);
             return faForces;
         }
-
         public double[] CalculateAccelerationForces(Element element, IList<MassAccelerationLoad> loads)
         {
             Vector<double> accelerations = new Vector<double>(24);

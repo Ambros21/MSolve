@@ -56,7 +56,10 @@ namespace ISAAR.MSolve.Analyzers
             }
             //File.WriteAllLines(String.Format(@"randoms.txt", expansionOrder), randoms);
         }
+        public void Solve(int h, int j)
+        {
 
+        }
         #region IAnalyzer Members
 
         public Dictionary<int, IAnalyzerLog[]> Logs { get { return logs; } }

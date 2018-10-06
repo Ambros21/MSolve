@@ -14,5 +14,6 @@ namespace ISAAR.MSolve.Analyzers.Interfaces
         void BuildMatrices();
         void Initialize();
         void Solve();
+        void Solve(int i, int j); //this was in order to help us make a proper dynamic solver in newton raphson. all classes that uses this interfaces are also updated.
     }
 }

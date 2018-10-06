@@ -305,7 +305,7 @@ namespace ISAAR.MSolve.SamplesConsole
                 }
             }
         }
-        public static void MakeHexaSoil(Model model,double Stoch1,double Stoch2)
+        public static void MakeHexaSoil(Model model, double Stoch1, double Stoch2, double[] Stoch3, double[] omega)
         {
             // xreiazetai na rythmizei kaneis ta megethi me auto to configuration
             var startX = 0.0;
@@ -328,17 +328,26 @@ namespace ISAAR.MSolve.SamplesConsole
                     for (int j = 0; j < imax; j++)
                     {
                         model.NodesDictionary.Add(nodeID, new Node() { ID = nodeID, X = startX + j * LengthX, Y = startY + k * LengthY, Z = startZ + l * LengthZ });
-
+                        //special commands for entering a beam
+                        if (startX + j * LengthX == hx / 2 && startY + k * LengthY == hy / 2 && startZ + l * LengthZ == hz)
+                        {
+                            model.NodesDictionary[nodeID].Constraints.Add(DOFType.Y);
+                            model.NodesDictionary[nodeID].Constraints.Add(DOFType.Z);
+                            model.NodesDictionary[nodeID].Constraints.Add(DOFType.RotX);
+                            model.NodesDictionary[nodeID].Constraints.Add(DOFType.RotZ);
+                        }
+                        //end of special commands
                         nodeID++;
                     }
                 }
             }
+            model.NodesDictionary.Add(nodeID, new Node() { ID = nodeID, X = hx / 2, Y = hy / 2, Z = hz + 3 }); //extra point for top of beam
             nodeID = 1;
             for (int j = 0; j < jmax; j++)
             {
                 for (int k = 0; k < imax; k++)
                 {
-                    model.NodesDictionary[nodeID].Constraints.Add(DOFType.X);
+                    //model.NodesDictionary[nodeID].Constraints.Add(DOFType.X); we will insert x ground acceleration
                     model.NodesDictionary[nodeID].Constraints.Add(DOFType.Y);
                     model.NodesDictionary[nodeID].Constraints.Add(DOFType.Z);
                     nodeID++;
@@ -379,12 +388,13 @@ namespace ISAAR.MSolve.SamplesConsole
                     var poisson = 0.3;
                     var alpha = 1.0;
                     var ksi = 0.02;
-                    var gamma = 20;
+                    var gamma = 10;  //effective stress
                     var Htot = hz;
                     for (int i = 0; i < gpNo; i++)
                         gaussPointMaterials[i] = new KavvadasClays(young, poisson, alpha, ksi);
                     var elementType1 = new Hexa8(gaussPointMaterials);
                     var gaussPoints = elementType1.CalculateGaussMatrices(nodeCoordinates);
+                    var elementType2 = new Hexa8u8p(gaussPointMaterials); //this because hexa8u8p has not all the fortran that hexa8 has.
                     for (int i = 0; i < gpNo; i++)
                     {
                         var ActualZeta = 0.0;
@@ -395,20 +405,39 @@ namespace ISAAR.MSolve.SamplesConsole
                         }
                         gaussPointMaterials[i].Zeta = ActualZeta;
                         initialStresses[2] = -gamma * (Htot - gaussPointMaterials[i].Zeta);
-                        initialStresses[0] = 0.85*initialStresses[2];
-                        initialStresses[1] = 0.85*initialStresses[2];
+                        initialStresses[0] = 0.85 * initialStresses[2];
+                        initialStresses[1] = 0.85 * initialStresses[2];
                         initialStresses[3] = 0;
                         initialStresses[4] = 0;
                         initialStresses[5] = 0;
                         gaussPointMaterials[i] = new KavvadasClays(Stoch1, Stoch2, 1, ksi, initialStresses);
                     }
                     elementType1 = new Hexa8(gaussPointMaterials);
+                    for (int i = 0; i < gpNo; i++)
+                    {
+                        var ActualZeta = 0.0;
+                        var help = elementType1.CalcH8Shape(gaussPoints[i].Xi, gaussPoints[i].Eta, gaussPoints[i].Zeta);
+                        for (int j = 0; j < gpNo; j++)
+                        {
+                            ActualZeta += help[j] * nodeCoordinates[j, 2];
+                        }
+                        for (int j = 0; j < 8; j = j + 2)
+                        {
+                            elementType2.Permeability[i] += Stoch3[j] * Math.Cos(omega[j] * ActualZeta);
+                        }
+                        for (int j = 1; j < 8; j = j + 2)
+                        {
+                            elementType2.Permeability[i] += Stoch3[j] * Math.Sin(omega[j] * ActualZeta);
+                        }
+                        elementType2.Permeability[i] = Math.Abs((elementType2.Permeability[i]) * 0.25 * Math.Pow(10, -8) + Math.Pow(10, -8)) / 1;
+                    }
+                    elementType2 = new Hexa8u8p(gaussPointMaterials);
                     e1 = new Element()
                     {
                         ID = IDhelp
                     };
                     IDhelp++;
-                    e1.ElementType = elementType1; //yliko meta diorthosi to material1
+                    e1.ElementType = elementType2; //yliko meta diorthosi to material1
                     e1.NodesDictionary.Add(1, model.NodesDictionary[ii]);
                     e1.NodesDictionary.Add(2, model.NodesDictionary[ii + 1]);
                     e1.NodesDictionary.Add(4, model.NodesDictionary[ii + 1 + imax]);
@@ -554,9 +583,9 @@ namespace ISAAR.MSolve.SamplesConsole
                 };
                 foreach (Element elementcheck in model.ElementsDictionary.Values)
                 {
-                    var Pa = -2500.0;
-                    var P2a = -5000.0 / 2;
-                    var P4a = -10000.0 / 4;
+                    var Pa = -3750.0;
+                    var P2a = -7500.0 / 2;
+                    var P4a = -15000.0 / 4;
                     var bool1 = elementcheck.NodesDictionary.ContainsValue(nodecheck);
                     var bool2 = nodecheck.Z == hz;
                     var bool3 = (nodecheck.X == 0 || nodecheck.X == hx) && (nodecheck.Y == 0 || nodecheck.Y == hy);
@@ -640,8 +669,11 @@ namespace ISAAR.MSolve.SamplesConsole
                         {
                             if (boolx && booly && boolz == true)
                             {
-                                Monitor = 3*nodeid-1;
+                               // Monitor = 4*nodeid-2+9;
                             }
+                        }
+                        if (Z != 0)
+                        {
                             nodeid++;
                         }
                     }

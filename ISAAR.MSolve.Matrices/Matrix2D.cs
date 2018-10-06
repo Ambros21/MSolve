@@ -156,7 +156,26 @@ namespace ISAAR.MSolve.Matrices
             //sw.Close();
             return new Matrix2D<double>(c);
         }
+        public static Matrix2D<double> Add (Matrix2D<double> A, Matrix2D<double> B)
+        {
+            if (A.Columns != B.Columns) throw new InvalidOperationException("Matrix sizes mismatch.");
+            if (A.Rows != B.Rows) throw new InvalidOperationException("Matrix sizes mismatch.");
+            Matrix2D<double> c = new Matrix2D<double>(A.Rows,A.Columns);
+            for (int i = 0; i < A.Rows; i++)
+                for (int k = 0; k < A.Columns; k++)
+                        c[i, k] += A[i, k] + B[i, k];
 
+            //var sw = System.IO.File.CreateText(@"d:\BeamTransformedSecondPart.txt");
+            //for (int i = 0; i < A.Rows; i++)
+            //{
+            //    var s = string.Empty;
+            //    for (int j = 0; j < B.Columns; j++)
+            //        s += c[i, j].ToString() + ";";
+            //    sw.WriteLine(s);
+            //}
+            //sw.Close();
+            return c;
+        }
         public static Vector<double> operator *(Matrix2D<T> A, Vector<double> b)
         {
             if (!(typeof(T) == typeof(double))) throw new InvalidOperationException("Cannot multiply for types other than double");

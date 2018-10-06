@@ -91,7 +91,10 @@ namespace ISAAR.MSolve.Analyzers
             this.randomsReadFileName = randomsReadFileName;
             this.simulationStartFrom = simulationStartFrom;
         }
+        public void Solve(int h, int j)
+        {
 
+        }
         #region IAnalyzer Members
 
         public Dictionary<int, IAnalyzerLog[]> Logs { get { return logs; } }
