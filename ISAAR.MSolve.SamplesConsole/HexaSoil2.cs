@@ -21,9 +21,9 @@ namespace ISAAR.MSolve.SamplesConsole
             var LengthY = 10.0;
             var LengthZ = 10.0;
             int nodeID = 1;
-            var hx = 160.0;
-            var hy = 160.0;
-            var hz = 40.0;
+            var hx = 20.0;
+            var hy = 20.0;
+            var hz = 20.0;
             var imax = (int)Math.Truncate(hx / LengthX) + 1;
             var jmax = (int)Math.Truncate(hy / LengthY) + 1;
             for (int l = 0; l < 3; l++)

@@ -16,46 +16,77 @@ namespace ISAAR.MSolve.PreProcessor.Elements.SupportiveClasses
 
             public double WeightFactor { get; set; }
 
-            public SymmetricMatrix2D<double> sectionstiffnessMatrix = new SymmetricMatrix2D<double>(6);
+            public SymmetricMatrix2D<double> sectionstiffnessMatrix { get; set; }
 
-            public SymmetricMatrix2D<double> sectionflexibilityMatrix = new SymmetricMatrix2D<double>(6);
+            public SymmetricMatrix2D<double> sectionflexibilityMatrix { get; set; }
 
-            public double[] sectionforces = new double[6];
+            public Vector<double> sectionforces { get; set; }
 
-            public double[] sectionforcesprev = new double[6];
+            public Vector<double> sectionforcesbalanced { get; set; }
 
-            public double[] residualdef = new double[6];
+            public double[] residualdef { get; set; }
 
-            public double[] deformations = new double[6];
+            public Vector<double> deformations { get; set; }
+
+            public Vector<double> deformationsbalanced { get; set; }
 
             #endregion
         }
-        // It has only the n=4 case with the respective points xi and the weight integral factors
-        private static readonly GaussLobattoPoint1D GaussLobaattoPoint1 = new GaussLobattoPoint1D
-        {
-            Coordinate = 1,
-            WeightFactor = 1 / 6
-        };
-        private static readonly GaussLobattoPoint1D GaussLobaattoPoint2 = new GaussLobattoPoint1D
-        {
-            Coordinate = -1,
-            WeightFactor = 1 / 6
-        };
-        private static readonly GaussLobattoPoint1D GaussLobaattoPoint3 = new GaussLobattoPoint1D
-        {
-            Coordinate = 0.44721359549,
-            WeightFactor = 5 / 6
-        };
-        private static readonly GaussLobattoPoint1D GaussLobaattoPoint4 = new GaussLobattoPoint1D
-        {
-            Coordinate = -0.44721359549,
-            WeightFactor = 5 / 6
-        };
+        // it has only the n=4 case with the respective points xi and the weight integral factors
         #region Public Methods
 
         public static GaussLobattoPoint1D[] GetGaussLobattoPoints()
         {
-            return new[] { GaussLobaattoPoint1, GaussLobaattoPoint2, GaussLobaattoPoint3, GaussLobaattoPoint4 };
+            var d = new GaussLobattoPoint1D[4];
+            d[0]= new GaussLobattoPoint1D
+            {
+                Coordinate = -1.0,
+                WeightFactor = 1.0 / 6.0,
+                sectionstiffnessMatrix = new SymmetricMatrix2D<double>(3),
+                sectionflexibilityMatrix = new SymmetricMatrix2D<double>(3),
+                sectionforces = new Vector<double>(3),
+                sectionforcesbalanced = new Vector<double>(3),
+                residualdef = new double[3],
+                deformations = new Vector<double>(3),
+                deformationsbalanced = new Vector<double>(3)
+            };
+            d[1]= new GaussLobattoPoint1D
+            {
+                Coordinate = -0.44721359549,
+                WeightFactor = 5.0 / 6.0,
+                sectionstiffnessMatrix = new SymmetricMatrix2D<double>(3),
+                sectionflexibilityMatrix = new SymmetricMatrix2D<double>(3),
+                sectionforces = new Vector<double>(3),
+                sectionforcesbalanced = new Vector<double>(3),
+                residualdef = new double[3],
+                deformations = new Vector<double>(3),
+                deformationsbalanced = new Vector<double>(3)
+            };
+            d[2] = new GaussLobattoPoint1D
+            {
+                Coordinate = 0.44721359549,
+                WeightFactor = 5.0 / 6.0,
+                sectionstiffnessMatrix = new SymmetricMatrix2D<double>(3),
+                sectionflexibilityMatrix = new SymmetricMatrix2D<double>(3),
+                sectionforces = new Vector<double>(3),
+                sectionforcesbalanced = new Vector<double>(3),
+                residualdef = new double[3],
+                deformations = new Vector<double>(3),
+                deformationsbalanced = new Vector<double>(3)
+            };
+            d[3] = new GaussLobattoPoint1D
+            {
+                Coordinate = 1.0,
+                WeightFactor = 1.0 / 6.0,
+                sectionstiffnessMatrix = new SymmetricMatrix2D<double>(3),
+                sectionflexibilityMatrix = new SymmetricMatrix2D<double>(3),
+                sectionforces = new Vector<double>(3),
+                sectionforcesbalanced = new Vector<double>(3),
+                residualdef = new double[3],
+                deformations = new Vector<double>(3),
+                deformationsbalanced = new Vector<double>(3)
+            };
+            return d;
         }
 
         #endregion

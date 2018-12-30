@@ -8,15 +8,30 @@ namespace ISAAR.MSolve.PreProcessor.Materials
 {
     public class SteelFiberMaterial : IFiberMaterial
     {
-        private readonly SteelFiberElementMaterial elementMaterial;
-        private double youngModulus, strain, stress, initialStrain, initialStress;
+        private  SteelFiberElementMaterial elementMaterial;
+        private double youngModulus, strain, stress, initialStrain, initialStress, fsyt, fsyc, sy,fsytb,fsycb;
         private bool modified = false;
         private bool initialValuesInitialized = false;
 
-        public SteelFiberMaterial(SteelFiberElementMaterial elementMaterial)
+        public SteelFiberMaterial(SteelFiberElementMaterial elementMaterial,double YoungModulus,double PoissonRatio,double HardeningRatio,double YieldStressInitial,double YieldStressTension, double YieldStressCompression)
         {
             this.elementMaterial = elementMaterial;
-            YoungModulus = elementMaterial.YoungModulus;
+            this.youngModulus = YoungModulus;
+            elementMaterial.YoungModulus = this.youngModulus;
+            this.strain = 0.0;
+            this.stress = 0.0;
+            this.initialStress = 0.0;
+            this.initialStrain = 0.0;
+            elementMaterial.PoissonRatio = PoissonRatio;
+            elementMaterial.HardeningRatio = HardeningRatio;
+            elementMaterial.YieldStressInitial = YieldStressInitial;
+            elementMaterial.YieldStressTension = YieldStressTension;
+            elementMaterial.YieldStressCompression = YieldStressCompression;
+            this.fsyc = elementMaterial.YieldStressCompression;
+            this.fsyt = elementMaterial.YieldStressTension;
+            this.fsycb = elementMaterial.YieldStressCompression;
+            this.fsytb = elementMaterial.YieldStressTension;
+            this.sy = elementMaterial.YieldStressInitial;
         }
 
         public SteelFiberMaterial(SteelFiberElementMaterial elementMaterial, SteelFiberMaterial sourceMaterial)
@@ -68,43 +83,46 @@ namespace ISAAR.MSolve.PreProcessor.Materials
 
         public void UpdateMaterial(double dStrain)
         {
-            double fsy = elementMaterial.YieldStress;
+            sy = elementMaterial.YieldStressInitial;
+            fsyt = elementMaterial.YieldStressTension;
+            fsyc = elementMaterial.YieldStressCompression; // Need to check if we get the correct balanced situation in the begining and we save it in savestate.
             double e0 = elementMaterial.YoungModulus;
             double b = elementMaterial.HardeningRatio;
-            double hc = 0;
-            double ht = 0;
-
-            double esh = b * e0;
-            double epsy = fsy / e0;
-            double epss = initialStrain + strain + dStrain;
-            //double epss = initialStrain + dStrain;
-
-            double c1 = esh * epss;
-            double c2 = (fsy + hc) * (1 - b);
-            double c3 = (fsy + ht) * (1 - b);
-            double c = initialStress + stress + e0 * dStrain;
-            //double c = initialStress + e0 * dStrain;
-            double sigs = Math.Max(c1 - c2, Math.Min(c1 + c3, c));
-
-            double oldYoungModulus = youngModulus;
-            youngModulus = esh;
-            if (Math.Abs(sigs - c) < 1e-10) youngModulus = e0;
-            if (oldYoungModulus != youngModulus) Modified = true;
-            strain = epss - initialStrain;
-            stress = sigs;
-
-            //if (!initialValuesInitialized)
-            //{
-            //    initialValuesInitialized = true;
-            //    initialStrain = strain;
-            //    initialStress = stress;
-            //}
+            double ds = e0 * dStrain;
+            strain = initialStrain + dStrain;
+            double strial = initialStress + ds;
+            if ((strial>fsytb)||(strial<fsycb))
+            {
+                if(strial>0)
+                {
+                    var help = (fsytb-initialStress) / e0;
+                    stress = fsytb + b * e0 * (dStrain - help);
+                    fsyt = stress;
+                    fsyc = -(2 * sy - fsyt);
+                }
+                else
+                {
+                    var help = (fsycb - initialStress) / e0;
+                    stress = fsycb + b * e0 * (dStrain - help);
+                    fsyc = stress;
+                    fsyt = Math.Abs((2 * sy - Math.Abs(fsyc)));
+                }
+                youngModulus = b * e0;
+                Modified = true;
+            }
+            else
+            {
+                stress = strial;
+                youngModulus = e0;
+            }
         }
 
         public void SaveState()
         {
-            initialStrain = strain;
-            initialStress = stress;
+            this.fsycb = this.fsyc;
+            this.fsytb = this.fsyt;
+            this.initialStrain = this.strain; //this variable is used here as the balanced strain at the last equillibrium.
+            this.initialStress = this.stress; //this variable is used here as the balanced stress at the last equillibrium.
             stress = 0;
             strain = 0;
         }
@@ -137,15 +155,8 @@ namespace ISAAR.MSolve.PreProcessor.Materials
 
         public IFiberMaterial Clone(IFiberFiniteElementMaterial parent)
         {
-            SteelFiberMaterial m = new SteelFiberMaterial((SteelFiberElementMaterial)parent);
-            m.youngModulus = this.youngModulus;
-            m.initialStrain = this.initialStrain;
-            m.initialStress = this.initialStress;
-            m.strain = this.strain;
-            m.stress = this.stress;
-            m.modified = this.modified;
-            m.initialValuesInitialized = this.initialValuesInitialized;
-
+            SteelFiberElementMaterial h = (SteelFiberElementMaterial)parent;
+            SteelFiberMaterial m = new SteelFiberMaterial(h,h.YoungModulus,h.PoissonRatio,h.HardeningRatio,h.YieldStressInitial,h.YieldStressTension,h.YieldStressCompression);
             return m;
         }
 

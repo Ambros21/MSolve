@@ -214,12 +214,6 @@ namespace ISAAR.MSolve.Analyzers
             }
         }
 
-        //TODO: in force-based methods, the total displacements at equilibrium points are updated from the corrected incremental displacements (deltaU).
-        //      The incremental displacements are updated during each iteration by adding the iterative displacements (du): deltaU += du.
-        //      However the force-based elements correct the incremental displacements (local vectors). 
-        //      These local vectors must be assembled into global vectors in the analyzer and then update the deltaU at the end of each N-R iteration.  
-        //      Keep in mind that this correction only applies for forced-based elements (therefore the same analyzer should work with both types).    
-        //      The above should be done in CalculateInternalRightHandSideNorm()
         public void Solve()
         {
             InitializeLogs();
@@ -239,8 +233,6 @@ namespace ISAAR.MSolve.Analyzers
                 {
                                   
                     this.solver.Solve();
-
-                    // Update the internal forces, the rhs vector and calculate the error. TODO: also correct the incremental displacements deltaU.
                     double errorNorm = this.CalculateInternalRightHandSideNorm() / ( this.rightHandSideNorm); //correction of the convergence criterion
 
                     if ((Double.IsNaN(errorNorm)) || (errorNorm >= MAX_RESIDUAL_NORM_ALLOWED))
@@ -251,7 +243,7 @@ namespace ISAAR.MSolve.Analyzers
                     {
                         break;
                     }
-                  // Console.WriteLine("NR {0}, iteration: {1}, error: {2}", increment, step, errorNorm);
+                   //Console.WriteLine("NR {0}, iteration: {1}, error: {2}", increment, step, errorNorm);
 
                     this.SplitResidualForcesToSubdomains();
                     if (((step + 1) % this.StepForMatrixRebuild) == 0)
@@ -263,17 +255,14 @@ namespace ISAAR.MSolve.Analyzers
 
                 }
                 this.SaveMaterialStateAndUpdateSolution();
-                // Console.WriteLine(this.displacementMap[1][dofid]);
-
-                
-                displacements[increment] = this.displacementMap[1][dofid]; 
+                //Console.WriteLine(this.displacementMap[1][dofid]);
+                displacements[increment] = this.displacementMap[1][dofid];
             }
             this.copySolutionToSubdomains();
             DateTime end = DateTime.Now;
             StoreLogResults(start, end);
         }
-
-        public void Solve(int currentincrement,int totalsteps)
+        public void Solve(int currentincrement, int totalsteps)
         {
             if (currentincrement == 0)
             {
@@ -283,41 +272,40 @@ namespace ISAAR.MSolve.Analyzers
                 this.loadFactor = 0.0;
                 this.initializeInternalVectors();
             }
-                this.incrementalLoadFactor = this.loadIncrementsList[currentincrement];
-                this.loadFactor += this.incrementalLoadFactor;
-                this.clearIncrementalSolutionVector();
-                this.UpdateRightHandSide();
+            this.incrementalLoadFactor = this.loadIncrementsList[currentincrement];
+            this.loadFactor += this.incrementalLoadFactor;
+            this.clearIncrementalSolutionVector();
+            this.UpdateRightHandSide();
 
-                for (int step = 0; step < MAX_ITERATIOMS; step++)
+            for (int step = 0; step < MAX_ITERATIOMS; step++)
+            {
+
+                this.solver.Solve();
+                double errorNorm = this.CalculateInternalRightHandSideNorm() / (this.rightHandSideNorm); //correction of the convergence criterion
+
+                if ((Double.IsNaN(errorNorm)) || (errorNorm >= MAX_RESIDUAL_NORM_ALLOWED))
                 {
-
-                    this.solver.Solve();
-
-                    double errorNorm = this.CalculateInternalRightHandSideNorm() / (this.rightHandSideNorm); //correction of the convergence criterion
-
-                    if ((Double.IsNaN(errorNorm)) || (errorNorm >= MAX_RESIDUAL_NORM_ALLOWED))
-                    {
-                        throw new ArithmeticException("The redisual norm exceeded the maximum allowed value.");
-                    }
-                    if (Math.Abs(errorNorm) < this.Tolerance)
-                    {
-                        break;
-                    }
-                    // Console.WriteLine("NR {0}, iteration: {1}, error: {2}", increment, step, errorNorm);
-
-                    this.SplitResidualForcesToSubdomains();
-                    if (((step + 1) % this.StepForMatrixRebuild) == 0)
-                    {
-                        provider.Reset();
-                        this.BuildMatrices();
-                        this.solver.Initialize();
-                    }
-
+                    throw new ArithmeticException("The redisual norm exceeded the maximum allowed value.");
                 }
-                this.SaveMaterialStateAndUpdateSolution();
-                // Console.WriteLine(this.displacementMap[1][dofid]);
-                displacements[currentincrement] = this.displacementMap[1][dofid];
-            if (currentincrement == (totalsteps-1))
+                if (Math.Abs(errorNorm) < this.Tolerance)
+                {
+                    break;
+                }
+             //    Console.WriteLine("NR {0}, iteration: {1}, error: {2}", currentincrement, step, errorNorm);
+
+                this.SplitResidualForcesToSubdomains();
+                if (((step + 1) % this.StepForMatrixRebuild) == 0)
+                {
+                    provider.Reset();
+                    this.BuildMatrices();
+                    this.solver.Initialize();
+                }
+
+            }
+            this.SaveMaterialStateAndUpdateSolution();
+           //  Console.WriteLine(this.displacementMap[1][dofid]);
+            displacements[currentincrement] = this.displacementMap[1][dofid];
+            if (currentincrement == (totalsteps - 1))
             {
                 this.copySolutionToSubdomains();
             }
@@ -325,9 +313,6 @@ namespace ISAAR.MSolve.Analyzers
             //StoreLogResults(start, end);
         }
 
-        /// <summary>
-        /// This method also updates the internal forces and the global rhs vector.
-        /// </summary>
         private double CalculateInternalRightHandSideNorm()
         {
             this.globalRightHandSide.Clear();
@@ -341,26 +326,17 @@ namespace ISAAR.MSolve.Analyzers
                 Vector<double> incrementalDisplacements = this.incrementalDisplacementMap[id];
                 incrementalDisplacements.Add(iterativeDisplacements);
 
-                Vector<double> displacements = this.displacementMap[id];
-
-                Vector<double> internalRightHandSide = subdomain.GetRHSFromSolution(displacements, incrementalDisplacements) as Vector<double>;
-
-                //TODO: At this point the element incremental displacements have been corrected. 
-                //      Assemble them and update the global incremental and total (why are they needed here?) displacements
-                //
-                // CorrectIncrementalDisplacements();
-                //
                 Vector<double> totalDisplacements = new Vector<double>(incrementalDisplacements.Length);
+                Vector<double> displacements = this.displacementMap[id];
                 totalDisplacements.Add(displacements);
                 totalDisplacements.Add(incrementalDisplacements);
 
-
+                Vector<double> internalRightHandSide = subdomain.GetRHSFromSolution(displacements, incrementalDisplacements) as Vector<double>;
                 this.provider.ProcessInternalRHS(subdomain, internalRightHandSide.Data, totalDisplacements.Data);
 
                 if (this.parentAnalyzer != null)
                 {
-                    //TODO: Perhaps the additionalRhs must be added only at the equilibrium points, outside N-R.
-                    Vector<double> additionalRightHandside = new Vector<double>(this.parentAnalyzer.GetOtherRHSComponents(subdomain, totalDisplacements));
+                    Vector<double> additionalRightHandside =new Vector<double>(this.parentAnalyzer.GetOtherRHSComponents(subdomain, totalDisplacements));
                     internalRightHandSide.Add(additionalRightHandside);
                 }
 

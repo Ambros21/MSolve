@@ -12,15 +12,16 @@ namespace ISAAR.MSolve.PreProcessor.Materials
         private double youngModulus;
         public double PoissonRatio { get; set; }
         public double HardeningRatio { get; set; }
-        public double YieldStress { get; set; }
+        public double YieldStressInitial { get; set; }
+        public double YieldStressTension { get; set; }
+        public double YieldStressCompression { get; set; }
         public double[] Coordinates { get; set; }
 
-        public SteelFiberElementMaterial(int noOfFibers)
+        public SteelFiberElementMaterial(int noOfFibers,double YoungModulus, double PoissonRatio, double HardeningRatio, double YieldStressInitial, double YieldStressTension, double YieldStressCompression)
         {
             fiberMaterials = new List<IFiberMaterial>(noOfFibers);
-            for (int i = 0; i < noOfFibers; i++) fiberMaterials.Add(new SteelFiberMaterial(this));
+            for (int i = 0; i < noOfFibers; i++) fiberMaterials.Add(new SteelFiberMaterial(this,YoungModulus,PoissonRatio,HardeningRatio,YieldStressInitial,YieldStressTension,YieldStressCompression));
         }
-
         public double YoungModulus 
         {
             get { return youngModulus; }
@@ -76,13 +77,7 @@ namespace ISAAR.MSolve.PreProcessor.Materials
 
         public object Clone()
         {
-            SteelFiberElementMaterial m = new SteelFiberElementMaterial(this.fiberMaterials.Count) 
-            { 
-                HardeningRatio = this.HardeningRatio, 
-                PoissonRatio = this.PoissonRatio, 
-                YieldStress = this.YieldStress,
-                youngModulus = this.youngModulus
-            };
+            SteelFiberElementMaterial m = new SteelFiberElementMaterial(this.fiberMaterials.Count,this.YoungModulus,this.PoissonRatio,this.HardeningRatio,this.YieldStressInitial,this.YieldStressTension,this.YieldStressCompression);
             m.fiberMaterials.Clear();
             foreach (IFiberMaterial f in this.fiberMaterials) m.fiberMaterials.Add(f.Clone(m));
 
