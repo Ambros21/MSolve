@@ -194,7 +194,10 @@ namespace ISAAR.MSolve.IGA.Entities
             AssignControlPointLoads();
             AssignBoundaryLoads();
         }
-
+        public void AssignLoads(int timeStep)
+        {
+            //INTENTIONALLY LEFT BLANK.
+        }
         private void AssignBoundaryLoads()
         {
             foreach (Patch patch in patchesDictionary.Values)

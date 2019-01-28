@@ -432,7 +432,7 @@ namespace ISAAR.MSolve.FEM.Elements
                 4*EIz*L
             });
 
-            var refx = new double[] { 1, 1, 1 };
+            var refx = new double[] { 1.0, 0.0, 1.0 }; //DONT FORGET TO CHANGE IT.
             var beamTransformation = new Matrix2D(12, 12);
             beamTransformation[0, 0] = (element.INodes[1].X - element.INodes[0].X) * L;
             beamTransformation[0, 1] = (element.INodes[1].Y - element.INodes[0].Y) * L;
@@ -574,7 +574,7 @@ namespace ISAAR.MSolve.FEM.Elements
             //    halfMass, 0,
             //    halfMass
             //});
-            double halfMass = Density * SectionArea / L / 6d;
+            double halfMass = Density * SectionArea / L / 2d; //WATCH OUT.
             var massMatrix = new SymmetricMatrix2D(new double[] { halfMass, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                 halfMass, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                 halfMass, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -589,7 +589,7 @@ namespace ISAAR.MSolve.FEM.Elements
                 0
             });
 
-            var refx = new double[] { 1, 1, 1 };
+            var refx = new double[] { 1, 0, 1 }; //DONT FORGET TO CHANGE IT.
             var beamTransformation = new Matrix2D(12, 12);
             beamTransformation[0, 0] = (element.INodes[1].X - element.INodes[0].X) * L;
             beamTransformation[0, 1] = (element.INodes[1].Y - element.INodes[0].Y) * L;

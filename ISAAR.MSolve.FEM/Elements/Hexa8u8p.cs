@@ -106,7 +106,13 @@ namespace ISAAR.MSolve.FEM.Elements
             //for (int i = 0; i < Hexa8u8p.iInt3; i++)
             //    materialsAtGaussPoints[i] = (IIsotropicContinuumMaterial3D)material.Clone();
         }
-
+        public Hexa8u8p(IIsotropicContinuumMaterial3D[] materials)
+        {
+            materialsAtGaussPoints = new IIsotropicContinuumMaterial3D[iInt3];
+            for (int i = 0; i < iInt3; i++)
+                materialsAtGaussPoints[i] = materials[i];
+        }//Notify Serafeim to add this constructor. Also WATCH OUT THE FORTRAN IMPORTS ARE VERY MUCH ALIVE. 
+        //ALSO DISCUSS WHY SHOULD OR SHOULD NOT BE PUBLIC OR PRIVATE SOME METHODS OF THE CLASS. ALSO HERE THE PERMEABILITY MATRIX FOR EACH GAUSS POINT IS USED.
         public Hexa8u8p(IIsotropicContinuumMaterial3D material, IElementDOFEnumerator dofEnumerator) : this(material)
         {
             this.dofEnumerator = dofEnumerator;
@@ -118,15 +124,15 @@ namespace ISAAR.MSolve.FEM.Elements
             set { dofEnumerator = value; }
         }
 
-        public double FluidBulkModulus { get; set; }
-        public double SolidDensity { get; set; }
-        public double FluidDensity { get; set; }
-        public double Permeability { get; set; }
-        public double Porosity { get; set; }
-        public double Saturation { get; set; }
-        public double PoreA { get; set; }
-        public double Xw { get; set; }
-        public double Cs { get; set; }
+        public double FluidBulkModulus { get; set; } = 2.2 * Math.Pow(10, 6);
+        public double SolidDensity { get; set; } = 2.8;
+        public double FluidDensity { get; set; } = 1;
+        public double[] Permeability { get; set; } = new double[8];
+        public double Porosity { get; set; } = 0.375;
+        public double Saturation { get; set; } = 1;
+        public double PoreA { get; set; } = 1;
+        public double Xw { get; set; } = 1;
+        public double Cs { get; set; } = 0;
         public double RayleighAlpha { get; set; }
         public double RayleighBeta { get; set; }
 
@@ -355,8 +361,8 @@ namespace ISAAR.MSolve.FEM.Elements
             CalcH8Forces(ref iInt, faB, faWeight, faStresses, solidForces);
 
             double[] faH = new double[36];
-            double[] faPermeability = new double[] { Permeability, Permeability, Permeability, Permeability, 
-                Permeability, Permeability, Permeability, Permeability };
+            double[] faPermeability = new double[] { Permeability[0], Permeability[1], Permeability[2], Permeability[3], 
+                Permeability[4], Permeability[5], Permeability[6], Permeability[7] };
             CalcH20u8pH(ref iInt, faPermeability, faS, faB, faWeight, faH);
 
             //double[,] faQ = new double[8, 24];
@@ -440,8 +446,8 @@ namespace ISAAR.MSolve.FEM.Elements
                 }
 
             double fD = FluidDensity;
-            double[] faPermeability = new double[] { Permeability, Permeability, Permeability, Permeability, 
-                Permeability, Permeability, Permeability, Permeability };
+            double[] faPermeability = new double[] { Permeability[0], Permeability[1], Permeability[2], Permeability[3],
+                Permeability[4], Permeability[5], Permeability[6], Permeability[7] };
             double[] faXw = new double[] { Xw, Xw, Xw, Xw, Xw, Xw, Xw, Xw };
             double[] faSw = new double[] { Saturation, Saturation, Saturation, Saturation, Saturation, 
                 Saturation, Saturation, Saturation };
@@ -514,8 +520,8 @@ namespace ISAAR.MSolve.FEM.Elements
             double[] faDetJ = new double[iInt3];
             double[, ,] faJ = new double[iInt3, 3, 3];
             double[] faWeight = new double[iInt3];
-            double[] faPermeability = new double[] { Permeability, Permeability, Permeability, Permeability, 
-                Permeability, Permeability, Permeability, Permeability };
+            double[] faPermeability = new double[] { Permeability[0], Permeability[1], Permeability[2], Permeability[3],
+                Permeability[4], Permeability[5], Permeability[6], Permeability[7] };
             double[] faH = new double[36];
             CalcH8GaussMatrices(ref iInt, faXYZ, faWeight, faS, faDS, faJ, faDetJ, faB);
             CalcH20u8pH(ref iInt, faPermeability, faS, faB, faWeight, faH);

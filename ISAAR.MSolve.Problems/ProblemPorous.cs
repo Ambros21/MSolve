@@ -220,7 +220,6 @@ namespace ISAAR.MSolve.Problems
             foreach (Subdomain subdomain in model.SubdomainsDictionary.Values)
                 for (int i = 0; i < subdomain.Forces.Length; i++)
                     subdomain.Forces[i] = 0;
-
             model.AssignLoads();
             model.AssignMassAccelerationHistoryLoads(timeStep);
         }

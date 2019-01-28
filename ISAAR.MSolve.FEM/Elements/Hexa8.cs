@@ -75,7 +75,12 @@ namespace ISAAR.MSolve.FEM.Elements
 			for (int i = 0; i < iInt3; i++)
 				materialsAtGaussPoints[i] = (IContinuumMaterial3D)material.Clone();
 		}
-
+        public Hexa8(IContinuumMaterial3D[] materials)
+        {
+            materialsAtGaussPoints = new IContinuumMaterial3D[iInt3];
+            for (int i = 0; i < iInt3; i++)
+                materialsAtGaussPoints[i] = materials[i];
+        } //Notify Serafeim to add this constructor. Also WATCH OUT THE FORTRAN IMPORTS ARE VERY MUCH ALIVE. ALSO DISCUSS WHY SHOULD OR SHOULD NOT BE PUBLIC OR PRIVATE SOME METHODS OF THE CLASS.
         public Hexa8(IContinuumMaterial3D material, IElementDOFEnumerator dofEnumerator)
             : this(material)
         {
@@ -138,7 +143,7 @@ namespace ISAAR.MSolve.FEM.Elements
             return element.Nodes;
         }
 
-        private double[] CalcH8Shape(double fXi, double fEta, double fZeta)
+        public double[] CalcH8Shape(double fXi, double fEta, double fZeta)
         {
             const double fSqC125 = 0.5;
             double fXiP = (1.0 + fXi) * fSqC125;
@@ -333,7 +338,7 @@ namespace ISAAR.MSolve.FEM.Elements
             return shapeFunctionDerivatives;
         }
 
-        private GaussLegendrePoint3D[] CalculateGaussMatrices(double[,] nodeCoordinates)
+        public GaussLegendrePoint3D[] CalculateGaussMatrices(double[,] nodeCoordinates)
         {
             GaussLegendrePoint1D[] integrationPointsPerAxis =
                 GaussQuadrature.GetGaussLegendrePoints(iInt);

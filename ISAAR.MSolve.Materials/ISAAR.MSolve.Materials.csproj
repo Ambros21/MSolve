@@ -4,6 +4,10 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <OutputPath>C:\Users\ambro\Source\Repos\MSolveOdy\ISAAR.MSolve.SamplesConsole\bin\Debug\</OutputPath>
+  </PropertyGroup>
+
   <ItemGroup>
     <Compile Remove="ElasticMaterial3D_v2.cs" />
   </ItemGroup>

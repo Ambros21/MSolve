@@ -6,6 +6,10 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <OutputPath>C:\Users\ambro\Source\Repos\MSolveOdy\ISAAR.MSolve.SamplesConsole\bin\Debug\</OutputPath>
+  </PropertyGroup>
+
   <ItemGroup>
     <None Remove="InputFiles\Qube4096.txt" />
     <None Remove="InputFiles\Qube512.txt" />

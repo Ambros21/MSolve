@@ -273,7 +273,6 @@ namespace ISAAR.MSolve.FEM.Entities
             AssignElementMassLoads();
             AssignMassAccelerationLoads();
         }
-
         public void AssignMassAccelerationHistoryLoads(int timeStep)
         {
             if (massAccelerationHistoryLoads.Count > 0)

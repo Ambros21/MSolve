@@ -9,7 +9,7 @@ namespace ISAAR.MSolve.Discretization.Interfaces
     {
 		Dictionary<int, ISubdomain> ISubdomainsDictionary { get;  }
 	    IList<IMassAccelerationHistoryLoad> MassAccelerationHistoryLoads { get; }
-		void AssignLoads();
+		void AssignLoads();  
 		void AssignMassAccelerationHistoryLoads(int timeStep);
 	}
 

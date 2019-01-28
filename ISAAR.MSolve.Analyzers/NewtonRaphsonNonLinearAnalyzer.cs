@@ -33,7 +33,6 @@ namespace ISAAR.MSolve.Analyzers
         private readonly Vector globalRHS;
         private readonly Dictionary<int, LinearAnalyzerLogFactory> logFactories = new Dictionary<int, LinearAnalyzerLogFactory>();
         private readonly Dictionary<int, IAnalyzerLog[]> logs = new Dictionary<int, IAnalyzerLog[]>();
-
         public NewtonRaphsonNonLinearAnalyzer(ISolver solver, ILinearSystem[] linearSystems, INonLinearSubdomainUpdater[] subdomainUpdaters, ISubdomainGlobalMapping[] mappings,
             INonLinearProvider provider, int increments, int totalDOFs)
         {
@@ -45,7 +44,6 @@ namespace ISAAR.MSolve.Analyzers
             this.increments = increments;
             this.totalDOFs = totalDOFs;
             this.globalRHS = new Vector(totalDOFs);
-
             InitializeInternalVectors();
         }
 
@@ -181,7 +179,6 @@ namespace ISAAR.MSolve.Analyzers
                         BuildMatrices();
                         solver.Initialize();
                     }
-
                 }
                 Debug.WriteLine("NR {0}, first error: {1}, exit error: {2}", step, firstError, errorNorm);
                 SaveMaterialStateAndUpdateSolution();
@@ -256,6 +253,7 @@ namespace ISAAR.MSolve.Analyzers
                 subdomainUpdaters[linearSystems.Select((v, i) => new { System = v, Index = i }).First(x => x.System.ID == subdomain.ID).Index].UpdateState();
                 u[subdomain.ID].Add(du[subdomain.ID]);
             }
+            Console.WriteLine(u[1][7]);
         }
 
         private void CopySolutionToSubdomains()
