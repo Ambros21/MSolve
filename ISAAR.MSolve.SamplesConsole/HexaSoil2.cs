@@ -315,9 +315,9 @@ namespace ISAAR.MSolve.SamplesConsole
             var LengthY = 10.0;
             var LengthZ = 10.0;
             int nodeID = 1;
-            var hx = 200.0;
-            var hy = 200.0;
-            var hz = 50.0;
+            var hx = 80.0;
+            var hy = 80.0;
+            var hz = 20.0;
             var imax = (int)Math.Truncate(hx / LengthX) + 1;
             var jmax = (int)Math.Truncate(hy / LengthY) + 1;
             var kmax = (int)Math.Truncate(hz / LengthZ) + 1;
@@ -328,26 +328,16 @@ namespace ISAAR.MSolve.SamplesConsole
                     for (int j = 0; j < imax; j++)
                     {
                         model.NodesDictionary.Add(nodeID, new Node() { ID = nodeID, X = startX + j * LengthX, Y = startY + k * LengthY, Z = startZ + l * LengthZ });
-                        //special commands for entering a beam
-                        if (startX + j * LengthX == hx / 2 && startY + k * LengthY == hy / 2 && startZ + l * LengthZ == hz)
-                        {
-                            model.NodesDictionary[nodeID].Constraints.Add(DOFType.Y);
-                            model.NodesDictionary[nodeID].Constraints.Add(DOFType.Z);
-                            model.NodesDictionary[nodeID].Constraints.Add(DOFType.RotX);
-                            model.NodesDictionary[nodeID].Constraints.Add(DOFType.RotZ);
-                        }
-                        //end of special commands
                         nodeID++;
                     }
                 }
             }
-            model.NodesDictionary.Add(nodeID, new Node() { ID = nodeID, X = hx / 2, Y = hy / 2, Z = hz + 3 }); //extra point for top of beam
             nodeID = 1;
             for (int j = 0; j < jmax; j++)
             {
                 for (int k = 0; k < imax; k++)
                 {
-                    //model.NodesDictionary[nodeID].Constraints.Add(DOFType.X); we will insert x ground acceleration
+                    model.NodesDictionary[nodeID].Constraints.Add(DOFType.X);
                     model.NodesDictionary[nodeID].Constraints.Add(DOFType.Y);
                     model.NodesDictionary[nodeID].Constraints.Add(DOFType.Z);
                     nodeID++;
@@ -412,7 +402,8 @@ namespace ISAAR.MSolve.SamplesConsole
                         initialStresses[5] = 0;
                         gaussPointMaterials[i] = new KavvadasClays(Stoch1, Stoch2, 1, ksi, initialStresses);
                     }
-                    elementType1 = new Hexa8(gaussPointMaterials);
+                    //elementType1 = new Hexa8(gaussPointMaterials);
+                    elementType2 = new Hexa8u8p(gaussPointMaterials);
                     for (int i = 0; i < gpNo; i++)
                     {
                         var ActualZeta = 0.0;
@@ -431,7 +422,6 @@ namespace ISAAR.MSolve.SamplesConsole
                         }
                         elementType2.Permeability[i] = Math.Abs((elementType2.Permeability[i]) * 0.25 * Math.Pow(10, -8) + Math.Pow(10, -8)) / 1;
                     }
-                    elementType2 = new Hexa8u8p(gaussPointMaterials);
                     e1 = new Element()
                     {
                         ID = IDhelp
@@ -639,9 +629,9 @@ namespace ISAAR.MSolve.SamplesConsole
             var LengthX = 10.0;
             var LengthY = 10.0;
             var LengthZ = 10.0;
-            var hx = 200.0;
-            var hy = 200.0;
-            var hz = 50.0;
+            var hx = 80.0;
+            var hy = 80.0;
+            var hz = 20.0;
             var imax = (int)Math.Truncate(hx / LengthX) + 1;
             var jmax = (int)Math.Truncate(hy / LengthY) + 1;
             var kmax = (int)Math.Truncate(hz / LengthZ) + 1;
@@ -669,7 +659,7 @@ namespace ISAAR.MSolve.SamplesConsole
                         {
                             if (boolx && booly && boolz == true)
                             {
-                               // Monitor = 4*nodeid-2+9;
+                                Monitor = 4*nodeid-2+81;
                             }
                         }
                         if (Z != 0)

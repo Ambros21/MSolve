@@ -138,7 +138,7 @@ namespace ISAAR.MSolve.PreProcessor.Materials
                 PAR[18] = 4;
                 PAR[9] = 4;
             QH[2] = 1.627;
-            QH[6] =Math.Min(0.5 * Math.Exp((Niso - QH[2] - PAR[3] * Math.Log(Math.Abs(s0))) / (PAR[2] - PAR[3])),400);
+            QH[6] = Math.Min(0.5 * Math.Exp((Niso - QH[2] - PAR[3] * Math.Log(Math.Abs(s0))) / (PAR[2] - PAR[3])),400);
             QH[1] = QH[6] * PAR[9]; //no use of OCR
                 PAR[0] = 0;
                 PAR[1] = 0.75;
