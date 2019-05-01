@@ -332,79 +332,80 @@ namespace ISAAR.MSolve.SamplesConsole
                     }
                 }
             }
-                nodeID = 1;
-                for (int j = 0; j < jmax; j++)
+            nodeID = 1;
+            for (int j = 0; j < jmax; j++)
+            {
+                for (int k = 0; k < imax; k++)
                 {
-                    for (int k = 0; k < imax; k++)
-                    {
-                        model.NodesDictionary[nodeID].Constraints.Add(DOFType.X);
-                        model.NodesDictionary[nodeID].Constraints.Add(DOFType.Y);
-                        model.NodesDictionary[nodeID].Constraints.Add(DOFType.Z);
-                        nodeID++;
-                    }
+                    model.NodesDictionary[nodeID].Constraints.Add(DOFType.X);
+                    model.NodesDictionary[nodeID].Constraints.Add(DOFType.Y);
+                    model.NodesDictionary[nodeID].Constraints.Add(DOFType.Z);
+                    nodeID++;
                 }
-                ElasticMaterial3D material1 = new ElasticMaterial3D()
+            }
+            ElasticMaterial3D material1 = new ElasticMaterial3D()
+            {
+                YoungModulus = 2.1e5,
+                PoissonRatio = 0.35,
+            };
+            Element e1;
+            int IDhelp = 1;
+            for (int ii = 1; ii < model.NodesDictionary.Count + 1; ii++)
+            {
+                var nodecheck = model.NodesDictionary[ii];
+                if (nodecheck.X != hx && nodecheck.Y != hy && nodecheck.Z != hz)
                 {
-                    YoungModulus = 2.1e5,
-                    PoissonRatio = 0.35,
-                };
-                Element e1;
-                int IDhelp = 1;
-                for (int ii = 1; ii < model.NodesDictionary.Count + 1; ii++)
-                {
-                    var nodecheck = model.NodesDictionary[ii];
-                    if (nodecheck.X != hx && nodecheck.Y != hy && nodecheck.Z != hz)
+                    const int gpNo = 8;
+                    var initialStresses = new double[6];
+                    var element1Nodes = new Node[8];
+                    element1Nodes[0] = model.NodesDictionary[ii];
+                    element1Nodes[1] = model.NodesDictionary[ii + 1];
+                    element1Nodes[2] = model.NodesDictionary[ii + 1 + imax];
+                    element1Nodes[3] = model.NodesDictionary[ii + imax];
+                    element1Nodes[4] = model.NodesDictionary[ii + jmax * imax];
+                    element1Nodes[5] = model.NodesDictionary[ii + jmax * imax + 1];
+                    element1Nodes[6] = model.NodesDictionary[ii + jmax * imax + 1 + imax];
+                    element1Nodes[7] = model.NodesDictionary[ii + jmax * imax + imax];
+                    var nodeCoordinates = new double[8, 3];
+                    for (int i = 0; i < 8; i++)
                     {
-                        const int gpNo = 8;
-                        var initialStresses = new double[6];
-                        var element1Nodes = new Node[8];
-                        element1Nodes[0] = model.NodesDictionary[ii];
-                        element1Nodes[1] = model.NodesDictionary[ii + 1];
-                        element1Nodes[2] = model.NodesDictionary[ii + 1 + imax];
-                        element1Nodes[3] = model.NodesDictionary[ii + imax];
-                        element1Nodes[4] = model.NodesDictionary[ii + jmax * imax];
-                        element1Nodes[5] = model.NodesDictionary[ii + jmax * imax + 1];
-                        element1Nodes[6] = model.NodesDictionary[ii + jmax * imax + 1 + imax];
-                        element1Nodes[7] = model.NodesDictionary[ii + jmax * imax + imax];
-                        var nodeCoordinates = new double[8, 3];
-                        for (int i = 0; i < 8; i++)
+                        nodeCoordinates[i, 0] = element1Nodes[i].X;
+                        nodeCoordinates[i, 1] = element1Nodes[i].Y;
+                        nodeCoordinates[i, 2] = element1Nodes[i].Z;
+                    }
+                    var gaussPointMaterials = new KavvadasClays[8];
+                    var young = 2.1e5;
+                    var poisson = 0.3;
+                    var alpha = 1.0;
+                    var ksi = 0.02;
+                    var gamma = 10;  //effective stress
+                    var Htot = hz;
+                    for (int i = 0; i < gpNo; i++)
+                        gaussPointMaterials[i] = new KavvadasClays(young, poisson, alpha, ksi);
+                    var elementType1 = new Hexa8(gaussPointMaterials);
+                    var gaussPoints = elementType1.CalculateGaussMatrices(nodeCoordinates);
+                    var elementType2 = new Hexa8u8p(gaussPointMaterials); //this because hexa8u8p has not all the fortran that hexa8 has.
+                    for (int i = 0; i < gpNo; i++)
+                    {
+                        var ActualZeta = 0.0;
+                        var help = elementType1.CalcH8Shape(gaussPoints[i].Xi, gaussPoints[i].Eta, gaussPoints[i].Zeta);
+                        for (int j = 0; j < gpNo; j++)
                         {
-                            nodeCoordinates[i, 0] = element1Nodes[i].X;
-                            nodeCoordinates[i, 1] = element1Nodes[i].Y;
-                            nodeCoordinates[i, 2] = element1Nodes[i].Z;
+                            ActualZeta += help[j] * nodeCoordinates[j, 2];
                         }
-                        var gaussPointMaterials = new KavvadasClays[8];
-                        var young = 2.1e5;
-                        var poisson = 0.3;
-                        var alpha = 1.0;
-                        var ksi = 0.02;
-                        var gamma = 10;  //effective stress
-                        var Htot = hz;
-                        for (int i = 0; i < gpNo; i++)
-                            gaussPointMaterials[i] = new KavvadasClays(young, poisson, alpha, ksi);
-                        var elementType1 = new Hexa8(gaussPointMaterials);
-                        var gaussPoints = elementType1.CalculateGaussMatrices(nodeCoordinates);
-                        var elementType2 = new Hexa8u8p(gaussPointMaterials); //this because hexa8u8p has not all the fortran that hexa8 has.
-                        for (int i = 0; i < gpNo; i++)
-                        {
-                            var ActualZeta = 0.0;
-                            var help = elementType1.CalcH8Shape(gaussPoints[i].Xi, gaussPoints[i].Eta, gaussPoints[i].Zeta);
-                            for (int j = 0; j < gpNo; j++)
-                            {
-                                ActualZeta += help[j] * nodeCoordinates[j, 2];
-                            }
-                            gaussPointMaterials[i].Zeta = ActualZeta;
-                            initialStresses[2] = -gamma * (Htot - gaussPointMaterials[i].Zeta);
-                            initialStresses[0] = 0.85 * initialStresses[2];
-                            initialStresses[1] = 0.85 * initialStresses[2];
-                            initialStresses[3] = 0;
-                            initialStresses[4] = 0;
-                            initialStresses[5] = 0;
-                            gaussPointMaterials[i] = new KavvadasClays(Stoch1, Stoch2, 1, ksi, initialStresses);
-                        }
-                        elementType2 = new Hexa8u8p(gaussPointMaterials);
-                      for (int i = 0; i < gpNo; i++)
-                      {
+                        gaussPointMaterials[i].Zeta = ActualZeta;
+                        initialStresses[2] = -gamma * (Htot - gaussPointMaterials[i].Zeta);
+                        initialStresses[0] = 0.85 * initialStresses[2];
+                        initialStresses[1] = 0.85 * initialStresses[2];
+                        initialStresses[3] = 0;
+                        initialStresses[4] = 0;
+                        initialStresses[5] = 0;
+                        gaussPointMaterials[i] = new KavvadasClays(Stoch1, Stoch2, 1, ksi, initialStresses);
+                    }
+                    //elementType1 = new Hexa8(gaussPointMaterials);
+                    elementType2 = new Hexa8u8p(gaussPointMaterials);
+                    for (int i = 0; i < gpNo; i++)
+                    {
                         var ActualZeta = 0.0;
                         var help = elementType1.CalcH8Shape(gaussPoints[i].Xi, gaussPoints[i].Eta, gaussPoints[i].Zeta);
                         for (int j = 0; j < gpNo; j++)
@@ -420,203 +421,203 @@ namespace ISAAR.MSolve.SamplesConsole
                             elementType2.Permeability[i] += Stoch3[j] * Math.Sin(omega[j] * ActualZeta);
                         }
                         elementType2.Permeability[i] = Math.Abs((elementType2.Permeability[i]) * 0.25 * Math.Pow(10, -8) + Math.Pow(10, -8)) / 1;
-                      }
-                        e1 = new Element()
-                        {
-                            ID = IDhelp
-                        };
-                        IDhelp++;
-                        e1.ElementType = elementType2; //yliko meta diorthosi to material1
-                        e1.NodesDictionary.Add(1, model.NodesDictionary[ii]);
-                        e1.NodesDictionary.Add(2, model.NodesDictionary[ii + 1]);
-                        e1.NodesDictionary.Add(4, model.NodesDictionary[ii + 1 + imax]);
-                        e1.NodesDictionary.Add(3, model.NodesDictionary[ii + imax]);
-                        e1.NodesDictionary.Add(5, model.NodesDictionary[ii + jmax * imax]);
-                        e1.NodesDictionary.Add(6, model.NodesDictionary[ii + jmax * imax + 1]);
-                        e1.NodesDictionary.Add(8, model.NodesDictionary[ii + jmax * imax + 1 + imax]);
-                        e1.NodesDictionary.Add(7, model.NodesDictionary[ii + jmax * imax + imax]);
-                        int subdomainID = 1;
-                        //e1.initialForces = e1.ElementType.CalculateForces(e1, initialStresses, initialStresses); no initial forces at this problem we use
-                        for (int i = 0; i < gpNo; i++)
-                            for (int j = 0; j < 6; j++)
-                            {
-                                gaussPointMaterials[i].Stresses[j] = gaussPointMaterials[i].Stresses[j] - gaussPointMaterials[i].initialStresses[j];
-                            }
-                        model.ElementsDictionary.Add(e1.ID, e1);
-                        model.SubdomainsDictionary[subdomainID].ElementsDictionary.Add(e1.ID, e1);
                     }
-                };
-                //DOFType doftype1;
-                //doftype1 = new DOFType();
-                #region initalloads
-                //Load loadinitialx = new Load();
-                //Load loadinitialy = new Load();
-                //Load loadinitialz = new Load();
-                //foreach (Node nodecheck in model.NodesDictionary.Values)
-                //{
-                //    loadinitialx = new Load()
-                //    {
-                //        Node = nodecheck,
-                //        //DOF = doftype1,
-                //        DOF = DOFType.X
-                //    };
-                //    foreach (Element elementcheck in model.ElementsDictionary.Values)
-                //    {
-                //        var bool1 = elementcheck.NodesDictionary.ContainsValue(nodecheck);
-                //        if (bool1 == true)
-                //        {
-                //        var help1 = 0;
-                //        var help = 0;
-                //        foreach(Node nodeelement in elementcheck.NodesDictionary.Values)
-                //        {
-                //            if (nodeelement==nodecheck)
-                //            {
-                //                    help = help1;
-                //            }
-                //                help1 += 1;
-                //        }
-                //            loadinitialx.Amount += -elementcheck.initialForces[3 * help];
-                //        }
-                //    }
-                //    model.Loads.Add(loadinitialx);
-                //}
-                //foreach (Node nodecheck in model.NodesDictionary.Values)
-                //{
-                //    loadinitialy = new Load()
-                //    {
-                //        Node = nodecheck,
-                //        //DOF = doftype1,
-                //        DOF = DOFType.Y
-                //    };
-                //    foreach (Element elementcheck in model.ElementsDictionary.Values)
-                //    {
-                //        var bool1 = elementcheck.NodesDictionary.ContainsValue(nodecheck);
-                //        if (bool1 == true)
-                //        {
-                //            var help1 = 0;
-                //            var help = 0;
-                //            foreach (Node nodeelement in elementcheck.NodesDictionary.Values)
-                //            {
-                //                if (nodeelement == nodecheck)
-                //                {
-                //                    help = help1;
-                //                }
-                //                help1 += 1;
-                //            }
-                //            loadinitialy.Amount += -elementcheck.initialForces[3*help+1];
-                //        }
-                //    }
-                //    model.Loads.Add(loadinitialy);
-                //}
-                //foreach (Node nodecheck in model.NodesDictionary.Values)
-                //{
-                //    loadinitialz = new Load()
-                //    {
-                //        Node = nodecheck,
-                //        //DOF = doftype1,
-                //        DOF = DOFType.Z
-                //    };
-                //    foreach (Element elementcheck in model.ElementsDictionary.Values)
-                //    {
-                //        var Pa = -5.0;
-                //        var P2a = -10.0/2;
-                //        var P4a = -20.0/4;
-                //        var bool1 = elementcheck.NodesDictionary.ContainsValue(nodecheck);
-                //        var bool2 = nodecheck.Z == hz;
-                //        var bool3 = (nodecheck.X == 0 || nodecheck.X == hx) && (nodecheck.Y == 0 || nodecheck.Y == hy);
-                //        var bool4 = nodecheck.X != 0 && nodecheck.X != hx && nodecheck.Y != 0 && nodecheck.Y != hy;
-                //        if (bool1 == true)
-                //        {
-                //            var help1 = 0;
-                //            var help = 0;
-                //            foreach (Node nodeelement in elementcheck.NodesDictionary.Values)
-                //            {
-                //                if (nodeelement == nodecheck)
-                //                {
-                //                    help = help1;
-                //                }
-                //                help1 += 1;
-                //            }
-                //            if (bool2 == true)
-                //            {
-                //                if (bool3 == true)
-                //                {
-                //                    loadinitialz.Amount += -Pa - elementcheck.initialForces[3 * help+2];
-                //                }
-                //                else if (bool4 == true)
-                //                {
-                //                    loadinitialz.Amount += -P4a - elementcheck.initialForces[3 * help+2];
-                //                }
-                //                else
-                //                {
-                //                    loadinitialz.Amount += -P2a - elementcheck.initialForces[3 * help+2];
-                //                }
-                //            }
-                //            else
-                //            {
-                //                loadinitialz.Amount += -elementcheck.initialForces[3 * help+2];
-                //            }
-                //        }
-                //    }
-                //    model.Loads.Add(loadinitialz);
-                //}
-                #endregion
-                Load loadinitialz = new Load();
-                foreach (Node nodecheck in model.NodesDictionary.Values)
-                {
-                    loadinitialz = new Load()
+                    e1 = new Element()
                     {
-                        Node = nodecheck,
-                        //DOF = doftype1,
-                        DOF = DOFType.Z
+                        ID = IDhelp
                     };
-                    foreach (Element elementcheck in model.ElementsDictionary.Values)
-                    {
-                        var Pa = -3750.0;
-                        var P2a = -7500.0 / 2;
-                        var P4a = -15000.0 / 4;
-                        var bool1 = elementcheck.NodesDictionary.ContainsValue(nodecheck);
-                        var bool2 = nodecheck.Z == hz;
-                        var bool3 = (nodecheck.X == 0 || nodecheck.X == hx) && (nodecheck.Y == 0 || nodecheck.Y == hy);
-                        var bool4 = nodecheck.X != 0 && nodecheck.X != hx && nodecheck.Y != 0 && nodecheck.Y != hy;
-                        if (bool1 == true)
+                    IDhelp++;
+                    e1.ElementType = elementType2; //yliko meta diorthosi to material1
+                    e1.NodesDictionary.Add(1, model.NodesDictionary[ii]);
+                    e1.NodesDictionary.Add(2, model.NodesDictionary[ii + 1]);
+                    e1.NodesDictionary.Add(4, model.NodesDictionary[ii + 1 + imax]);
+                    e1.NodesDictionary.Add(3, model.NodesDictionary[ii + imax]);
+                    e1.NodesDictionary.Add(5, model.NodesDictionary[ii + jmax * imax]);
+                    e1.NodesDictionary.Add(6, model.NodesDictionary[ii + jmax * imax + 1]);
+                    e1.NodesDictionary.Add(8, model.NodesDictionary[ii + jmax * imax + 1 + imax]);
+                    e1.NodesDictionary.Add(7, model.NodesDictionary[ii + jmax * imax + imax]);
+                    int subdomainID = 1;
+                    //e1.initialForces = e1.ElementType.CalculateForces(e1, initialStresses, initialStresses); no initial forces at this problem we use
+                    for (int i = 0; i < gpNo; i++)
+                        for (int j = 0; j < 6; j++)
                         {
-                            var help1 = 0;
-                            var help = 0;
-                            foreach (Node nodeelement in elementcheck.NodesDictionary.Values)
+                            gaussPointMaterials[i].Stresses[j] = gaussPointMaterials[i].Stresses[j] - gaussPointMaterials[i].initialStresses[j];
+                        }
+                    model.ElementsDictionary.Add(e1.ID, e1);
+                    model.SubdomainsDictionary[subdomainID].ElementsDictionary.Add(e1.ID, e1);
+                }
+            };
+            //DOFType doftype1;
+            //doftype1 = new DOFType();
+            #region initalloads
+            //Load loadinitialx = new Load();
+            //Load loadinitialy = new Load();
+            //Load loadinitialz = new Load();
+            //foreach (Node nodecheck in model.NodesDictionary.Values)
+            //{
+            //    loadinitialx = new Load()
+            //    {
+            //        Node = nodecheck,
+            //        //DOF = doftype1,
+            //        DOF = DOFType.X
+            //    };
+            //    foreach (Element elementcheck in model.ElementsDictionary.Values)
+            //    {
+            //        var bool1 = elementcheck.NodesDictionary.ContainsValue(nodecheck);
+            //        if (bool1 == true)
+            //        {
+            //        var help1 = 0;
+            //        var help = 0;
+            //        foreach(Node nodeelement in elementcheck.NodesDictionary.Values)
+            //        {
+            //            if (nodeelement==nodecheck)
+            //            {
+            //                    help = help1;
+            //            }
+            //                help1 += 1;
+            //        }
+            //            loadinitialx.Amount += -elementcheck.initialForces[3 * help];
+            //        }
+            //    }
+            //    model.Loads.Add(loadinitialx);
+            //}
+            //foreach (Node nodecheck in model.NodesDictionary.Values)
+            //{
+            //    loadinitialy = new Load()
+            //    {
+            //        Node = nodecheck,
+            //        //DOF = doftype1,
+            //        DOF = DOFType.Y
+            //    };
+            //    foreach (Element elementcheck in model.ElementsDictionary.Values)
+            //    {
+            //        var bool1 = elementcheck.NodesDictionary.ContainsValue(nodecheck);
+            //        if (bool1 == true)
+            //        {
+            //            var help1 = 0;
+            //            var help = 0;
+            //            foreach (Node nodeelement in elementcheck.NodesDictionary.Values)
+            //            {
+            //                if (nodeelement == nodecheck)
+            //                {
+            //                    help = help1;
+            //                }
+            //                help1 += 1;
+            //            }
+            //            loadinitialy.Amount += -elementcheck.initialForces[3*help+1];
+            //        }
+            //    }
+            //    model.Loads.Add(loadinitialy);
+            //}
+            //foreach (Node nodecheck in model.NodesDictionary.Values)
+            //{
+            //    loadinitialz = new Load()
+            //    {
+            //        Node = nodecheck,
+            //        //DOF = doftype1,
+            //        DOF = DOFType.Z
+            //    };
+            //    foreach (Element elementcheck in model.ElementsDictionary.Values)
+            //    {
+            //        var Pa = -5.0;
+            //        var P2a = -10.0/2;
+            //        var P4a = -20.0/4;
+            //        var bool1 = elementcheck.NodesDictionary.ContainsValue(nodecheck);
+            //        var bool2 = nodecheck.Z == hz;
+            //        var bool3 = (nodecheck.X == 0 || nodecheck.X == hx) && (nodecheck.Y == 0 || nodecheck.Y == hy);
+            //        var bool4 = nodecheck.X != 0 && nodecheck.X != hx && nodecheck.Y != 0 && nodecheck.Y != hy;
+            //        if (bool1 == true)
+            //        {
+            //            var help1 = 0;
+            //            var help = 0;
+            //            foreach (Node nodeelement in elementcheck.NodesDictionary.Values)
+            //            {
+            //                if (nodeelement == nodecheck)
+            //                {
+            //                    help = help1;
+            //                }
+            //                help1 += 1;
+            //            }
+            //            if (bool2 == true)
+            //            {
+            //                if (bool3 == true)
+            //                {
+            //                    loadinitialz.Amount += -Pa - elementcheck.initialForces[3 * help+2];
+            //                }
+            //                else if (bool4 == true)
+            //                {
+            //                    loadinitialz.Amount += -P4a - elementcheck.initialForces[3 * help+2];
+            //                }
+            //                else
+            //                {
+            //                    loadinitialz.Amount += -P2a - elementcheck.initialForces[3 * help+2];
+            //                }
+            //            }
+            //            else
+            //            {
+            //                loadinitialz.Amount += -elementcheck.initialForces[3 * help+2];
+            //            }
+            //        }
+            //    }
+            //    model.Loads.Add(loadinitialz);
+            //}
+            #endregion
+            Load loadinitialz = new Load();
+            foreach (Node nodecheck in model.NodesDictionary.Values)
+            {
+                loadinitialz = new Load()
+                {
+                    Node = nodecheck,
+                    //DOF = doftype1,
+                    DOF = DOFType.Z
+                };
+                foreach (Element elementcheck in model.ElementsDictionary.Values)
+                {
+                    var Pa = -3750.0;
+                    var P2a = -7500.0 / 2;
+                    var P4a = -15000.0 / 4;
+                    var bool1 = elementcheck.NodesDictionary.ContainsValue(nodecheck);
+                    var bool2 = nodecheck.Z == hz;
+                    var bool3 = (nodecheck.X == 0 || nodecheck.X == hx) && (nodecheck.Y == 0 || nodecheck.Y == hy);
+                    var bool4 = nodecheck.X != 0 && nodecheck.X != hx && nodecheck.Y != 0 && nodecheck.Y != hy;
+                    if (bool1 == true)
+                    {
+                        var help1 = 0;
+                        var help = 0;
+                        foreach (Node nodeelement in elementcheck.NodesDictionary.Values)
+                        {
+                            if (nodeelement == nodecheck)
                             {
-                                if (nodeelement == nodecheck)
-                                {
-                                    help = help1;
-                                }
-                                help1 += 1;
+                                help = help1;
                             }
-                            if (bool2 == true)
+                            help1 += 1;
+                        }
+                        if (bool2 == true)
+                        {
+                            if (bool3 == true)
                             {
-                                if (bool3 == true)
-                                {
-                                    loadinitialz.Amount += Pa;
-                                }
-                                else if (bool4 == true)
-                                {
-                                    loadinitialz.Amount += P4a;
-                                }
-                                else
-                                {
-                                    loadinitialz.Amount += P2a;
-                                }
+                                loadinitialz.Amount += Pa;
+                            }
+                            else if (bool4 == true)
+                            {
+                                loadinitialz.Amount += P4a;
                             }
                             else
                             {
-                                loadinitialz.Amount += 0;
+                                loadinitialz.Amount += P2a;
                             }
                         }
-                    }
-                    if (loadinitialz.Amount != 0)
-                    {
-                        model.Loads.Add(loadinitialz);
+                        else
+                        {
+                            loadinitialz.Amount += 0;
+                        }
                     }
                 }
+                if (loadinitialz.Amount != 0)
+                {
+                    model.Loads.Add(loadinitialz);
+                }
+            }
         }
         public static int ProvideIdMonitor(Model model)
         {
@@ -635,8 +636,8 @@ namespace ISAAR.MSolve.SamplesConsole
             var jmax = (int)Math.Truncate(hy / LengthY) + 1;
             var kmax = (int)Math.Truncate(hz / LengthZ) + 1;
             var nodeid = 1;
-            var mx = hx / 2;
-            var my = hy / 2;
+            var mx = hx/2;
+            var my = hy/2;
             var mz = hz;
             var Monitor = 0;
             for (int l = 0; l < kmax; l++)
@@ -658,7 +659,7 @@ namespace ISAAR.MSolve.SamplesConsole
                         {
                             if (boolx && booly && boolz == true)
                             {
-                                 Monitor = 4*nodeid-2+81;
+                                Monitor = 4*nodeid-2+81;
                             }
                         }
                         if (Z != 0)
@@ -672,6 +673,4 @@ namespace ISAAR.MSolve.SamplesConsole
         }
     }
 }
-
-
 
