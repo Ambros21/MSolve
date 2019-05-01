@@ -126,7 +126,7 @@ namespace ISAAR.MSolve.PreProcessor.Elements
             set { dofEnumerator = value; }
         }
 
-        public double Density { get; set; }
+        public double Density{ get; set; }
         public double RayleighAlpha { get; set; }
         public double RayleighBeta { get; set; }
 

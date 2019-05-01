@@ -305,10 +305,10 @@ namespace ISAAR.MSolve.Analyzers
             this.SaveMaterialStateAndUpdateSolution();
            //  Console.WriteLine(this.displacementMap[1][dofid]);
             displacements[currentincrement] = this.displacementMap[1][dofid];
-            if (currentincrement == (totalsteps - 1))
-            {
-                this.copySolutionToSubdomains();
-            }
+           
+            
+                this.copySolutionToSubdomains(); //REMEMBER THE IF CLAUSE (CURRENTINCREMENT==TOTALSTEPS-1) NO NEED THIS IF CLAUSE
+            
             //DateTime end = DateTime.Now;
             //StoreLogResults(start, end);
         }

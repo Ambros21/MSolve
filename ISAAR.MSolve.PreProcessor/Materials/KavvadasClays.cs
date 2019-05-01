@@ -103,7 +103,7 @@ namespace ISAAR.MSolve.PreProcessor.Materials
                 this.QH[i] = this.tempQH[i];
             for (int i = 0; i < 6; i++)
                 this.Stresses[i] = this.tempStresses[i];
-            this.DecideLoad(PAR, incrementalStrains,  QH, Stresses, ConstitutiveMatrix);
+            this.DecideLoad(PAR, incrementalStrains, QH, Stresses, ConstitutiveMatrix);
         }
 
         public KavvadasClays(double youngModulus, double poissonRatio, double alpha, double ksi)
