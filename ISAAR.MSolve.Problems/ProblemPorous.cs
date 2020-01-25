@@ -222,6 +222,7 @@ namespace ISAAR.MSolve.Problems
                     subdomain.Forces[i] = 0;
             model.AssignLoads();
             model.AssignMassAccelerationHistoryLoads(timeStep);
+            model.AssignTimeDependentNodalLoads(timeStep);
         }
 
         public IDictionary<int, double[]> GetAccelerationsOfTimeStep(int timeStep)

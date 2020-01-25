@@ -21,7 +21,8 @@ namespace ISAAR.MSolve.Analyzers
         private readonly int totalDOFs;
         private int maxSteps = 1000;
         private int stepsForMatrixRebuild = 1;
-        private readonly double tolerance = 1e-8;
+        private readonly double tolerance = 0.9e-2;
+        public int totnuminc { get; set;} // Helping variable to use a lighter convergence criterion. Check SOLVE() for more info.
         private double rhsNorm;
         private INonLinearParentAnalyzer parentAnalyzer = null;
         private readonly ISolver solver;
@@ -132,7 +133,10 @@ namespace ISAAR.MSolve.Analyzers
                 rhs[subdomain.ID] = r;
                 mappings[linearSystems.Select((v, i) => new { System = v, Index = i }).First(x => x.System.ID == subdomain.ID).Index].SubdomainToGlobalVector(((Vector)subdomain.RHS).Data, globalRHS.Data);
             }
-            rhsNorm = provider.RHSNorm(globalRHS.Data);
+            if (rhsNorm == 0)
+            {
+                rhsNorm = provider.RHSNorm(globalRHS.Data); //This is in order for the lighter convergence to hold. It should not have the if clause otherwise.
+            }
         }
 
         public void Initialize()
@@ -167,7 +171,8 @@ namespace ISAAR.MSolve.Analyzers
                 for (step = 0; step < maxSteps; step++)
                 {
                     solver.Solve();
-                    errorNorm = rhsNorm != 0 ? CalculateInternalRHS(increment, step) / rhsNorm : 0;// (rhsNorm*increment/increments) : 0;//TODOMaria this calculates the internal force vector and subtracts it from the external one (calculates the residual)
+                    errorNorm = rhsNorm != 0 ? CalculateInternalRHS(increment, step) / (totnuminc*rhsNorm) : 0;
+                    //errorNorm = rhsNorm != 0 ? CalculateInternalRHS(increment, step) / rhsNorm : 0; //In ambro porous problems we use the lighter version of convergence criterion and not this one.  // (rhsNorm*increment/increments) : 0;//TODOMaria this calculates the internal force vector and subtracts it from the external one (calculates the residual)
                     if (step == 0) firstError = errorNorm;
                     if (IncrementalDisplacementsLog != null) IncrementalDisplacementsLog.StoreDisplacements(uPlusdu); // Logging should be done before exiting the last iteration.
                     if (errorNorm < tolerance) break;
@@ -211,7 +216,7 @@ namespace ISAAR.MSolve.Analyzers
                     uPlusdu[subdomain.ID].Add(du[subdomain.ID]);
                 }
                 //Vector<double> internalRHS = (Vector<double>)subdomain.GetRHSFromSolution(u[subdomain.ID], du[subdomain.ID]);
-                Vector internalRHS = (Vector)subdomainUpdaters[linearSystems.Select((v, i) => new { System = v, Index = i }).First(x => x.System.ID == subdomain.ID).Index].GetRHSFromSolution(uPlusdu[subdomain.ID], du[subdomain.ID]);//TODOMaria this calculates the internal forces
+                Vector internalRHS = (Vector)subdomainUpdaters[linearSystems.Select((v, i) => new { System = v, Index = i }).First(x => x.System.ID == subdomain.ID).Index].GetRHSFromSolution(u[subdomain.ID], du[subdomain.ID]);//TODOMaria this calculates the internal forces. Here it was uplusdu but should be u. I corrected it and note it here.
                 provider.ProcessInternalRHS(subdomain, internalRHS.Data, uPlusdu[subdomain.ID].Data);//TODOMaria this does nothing
                 //(new Vector<double>(u[subdomain.ID] + du[subdomain.ID])).Data);
 
@@ -253,7 +258,7 @@ namespace ISAAR.MSolve.Analyzers
                 subdomainUpdaters[linearSystems.Select((v, i) => new { System = v, Index = i }).First(x => x.System.ID == subdomain.ID).Index].UpdateState();
                 u[subdomain.ID].Add(du[subdomain.ID]);
             }
-            Console.WriteLine(u[1][7]);
+            //Console.WriteLine(u[1][567]);
         }
 
         private void CopySolutionToSubdomains()

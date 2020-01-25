@@ -136,9 +136,10 @@ namespace ISAAR.MSolve.FEM.Elements
         public double RayleighAlpha { get; set; }
         public double RayleighBeta { get; set; }
 
-        public double SolidBulkModulus { get { return materialsAtGaussPoints[0].YoungModulus / (3 - 6 * materialsAtGaussPoints[0].PoissonRatio); } }
-        public double Density { get { return Porosity * Saturation * FluidDensity + 
-            (1 - Porosity) * SolidDensity; } }
+        public double SolidBulkModulus { get { return (materialsAtGaussPoints[0].YoungModulus + materialsAtGaussPoints[1].YoungModulus) / (6 - 12 * materialsAtGaussPoints[0].PoissonRatio); } } //Mean value of Solid Bulk Modulus. :) 
+        //public double Density { get { return Porosity * Saturation * FluidDensity + 
+        //    (1 - Porosity) * SolidDensity; } }
+        public double Density { get; set; } = 2.125;
         public double QInv { get { return Cs + Porosity * Saturation / FluidBulkModulus + 
             (PoreA - Porosity) * Saturation / SolidBulkModulus; } }
 

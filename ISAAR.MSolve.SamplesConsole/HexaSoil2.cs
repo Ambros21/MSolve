@@ -28,6 +28,7 @@ using System.Text;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using ISAAR.MSolve.FEM.Entities.TemporalFunctions;
 #endregion
 
 namespace ISAAR.MSolve.SamplesConsole
@@ -129,7 +130,7 @@ namespace ISAAR.MSolve.SamplesConsole
                         initialStresses[3] = 0;
                         initialStresses[4] = 0;
                         initialStresses[5] = 0;
-                        gaussPointMaterials[i] = new KavvadasClays(2, 2, 2, ksi, initialStresses); //NO STOCHASTIC USE.
+                        gaussPointMaterials[i] = new KavvadasClays(young, poisson, 2, ksi, initialStresses); //NO STOCHASTIC USE.
                     }
                     elementType2 = new Hexa8u8p(gaussPointMaterials);
                     for (int i = 0; i < gpNo; i++)
@@ -276,15 +277,14 @@ namespace ISAAR.MSolve.SamplesConsole
             //    model.Loads.Add(loadinitialz);
             //}
             #endregion
-            Load loadinitialz = new Load();
+            double nodalLoad = 0.0;
+            double totalDuration = 2.0;
+            double timeStepDuration = 0.1;
+            double constantsegmentdurationratio = 0.25;
+            GeneralDynamicNodalLoad loadinitialz;
             foreach (Node nodecheck in model.NodesDictionary.Values)
             {
-                loadinitialz = new Load()
-                {
-                    Node = nodecheck,
-                    //DOF = doftype1,
-                    DOF = DOFType.Z
-                };
+                nodalLoad = 0.0;
                 foreach (Element elementcheck in model.ElementsDictionary.Values)
                 {
                     var Pa = -3750.0;
@@ -310,26 +310,28 @@ namespace ISAAR.MSolve.SamplesConsole
                         {
                             if (bool3 == true)
                             {
-                                loadinitialz.Amount += Pa;
+                                nodalLoad += Pa;
                             }
                             else if (bool4 == true)
                             {
-                                loadinitialz.Amount += P4a;
+                                nodalLoad += P4a;
                             }
                             else
                             {
-                                loadinitialz.Amount += P2a;
+                                nodalLoad += P2a;
                             }
                         }
                         else
                         {
-                            loadinitialz.Amount += 0;
+                            nodalLoad += 0;
                         }
                     }
                 }
-                if (loadinitialz.Amount != 0)
+                if (nodalLoad != 0)
                 {
-                    model.Loads.Add(loadinitialz);
+                    var timeFunction = new RampTemporalFunction(nodalLoad, totalDuration, timeStepDuration, constantsegmentdurationratio * totalDuration);
+                    loadinitialz = new GeneralDynamicNodalLoad(nodecheck, DOFType.Z, timeFunction);
+                    model.TimeDependentNodalLoads.Add(loadinitialz);
                 }
             }
         }
@@ -604,24 +606,23 @@ namespace ISAAR.MSolve.SamplesConsole
             //    model.Loads.Add(loadinitialz);
             //}
             #endregion
-            Load loadinitialz = new Load();
+            double nodalLoad = 0.0;
+            double totalDuration = 0.50;
+            double timeStepDuration = 0.1;
+            double constantsegmentdurationratio = 0.8;
+            GeneralDynamicNodalLoad loadinitialz;
             foreach (Node nodecheck in model.NodesDictionary.Values)
             {
-                loadinitialz = new Load()
-                {
-                    Node = nodecheck,
-                    //DOF = doftype1,
-                    DOF = DOFType.Z
-                };
+                nodalLoad = 0.0;
                 foreach (Element elementcheck in model.ElementsDictionary.Values)
                 {
-                    var Pa = -3750.0;
-                    var P2a = -7500.0 / 2;
-                    var P4a = -15000.0 / 4;
+                    var Pa = -375.0;
+                    var P2a = -750.0 / 2;
+                    var P4a = -1500.0 / 4;
                     var bool1 = elementcheck.NodesDictionary.ContainsValue(nodecheck);
                     var bool2 = nodecheck.Z == hz;
                     var bool3 = (nodecheck.X == 0 || nodecheck.X == hx) && (nodecheck.Y == 0 || nodecheck.Y == hy);
-                    var bool4 = nodecheck.X != 0 && nodecheck.X != hx  && nodecheck.Y != 0 && nodecheck.Y != hy;
+                    var bool4 = nodecheck.X != 0 && nodecheck.X != hx && nodecheck.Y != 0 && nodecheck.Y != hy;
                     if (bool1 == true)
                     {
                         var help1 = 0;
@@ -638,26 +639,28 @@ namespace ISAAR.MSolve.SamplesConsole
                         {
                             if (bool3 == true)
                             {
-                                loadinitialz.Amount += Pa;
+                                nodalLoad += Pa;
                             }
                             else if (bool4 == true)
                             {
-                                loadinitialz.Amount += P4a;
+                                nodalLoad += P4a;
                             }
                             else
                             {
-                                loadinitialz.Amount += P2a;
+                                nodalLoad += P2a;
                             }
                         }
                         else
                         {
-                            loadinitialz.Amount += 0;
+                            nodalLoad += 0;
                         }
                     }
                 }
-                if (loadinitialz.Amount != 0)
+                if (nodalLoad != 0)
                 {
-                    model.Loads.Add(loadinitialz);
+                    var timeFunction = new RampTemporalFunction(nodalLoad, totalDuration, timeStepDuration, constantsegmentdurationratio * totalDuration);
+                    loadinitialz = new GeneralDynamicNodalLoad(nodecheck, DOFType.Z, timeFunction);
+                    model.TimeDependentNodalLoads.Add(loadinitialz);
                 }
             }
 

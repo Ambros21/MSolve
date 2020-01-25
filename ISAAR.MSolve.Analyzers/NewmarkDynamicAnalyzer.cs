@@ -272,7 +272,7 @@ namespace ISAAR.MSolve.Analyzers
             for (int i = 0; i < (int)(totalTime / timeStep); i++)
             {
                 Debug.WriteLine("Newmark step: {0}", i);
-                provider.GetRHSFromHistoryLoad(i);
+                provider.GetRHSFromHistoryLoad(i); //SPOT THE ERROR IS HERE
                 InitializeRHSs();
                 // ProcessRHS
                 CalculateRHSImplicit();

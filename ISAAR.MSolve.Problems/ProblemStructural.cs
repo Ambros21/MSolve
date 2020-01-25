@@ -224,6 +224,7 @@ namespace ISAAR.MSolve.Problems
 
             model.AssignLoads();
             model.AssignMassAccelerationHistoryLoads(timeStep);
+            if (model is Model femModel) femModel.AssignTimeDependentNodalLoads(timeStep);
 
             foreach (var l in subdomains)
                 l.Value.RHS.CopyFrom(0, l.Value.RHS.Length, new Vector(model.ISubdomainsDictionary[l.Key].Forces), 0);

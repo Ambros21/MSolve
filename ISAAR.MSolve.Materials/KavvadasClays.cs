@@ -53,7 +53,7 @@ namespace ISAAR.MSolve.PreProcessor.Materials
         {
             for (int j1 = 0; j1 < 6; j1++)
             {
-                strainsIncrement[j1] = incrementalStrains[j1];
+               incrementalStrains[j1]=strainsIncrement[j1];
             }
             //this.incrementalStrains = strainsIncrement.DeepClone();
             for (int i = 0; i < 21; i++)
@@ -152,8 +152,8 @@ namespace ISAAR.MSolve.PreProcessor.Materials
             }
             else
             {
-                Kmax = 0.5*0.008686;
-                Kmin = 0.5*0.008686;
+                Kmax = 0.1*0.008686;
+                Kmin = 0.1*0.008686;
             }
             PAR[3]= (Kmin - Kmax) * Zeta / Htot + Kmax;
             PAR[2] = 10 * PAR[3];

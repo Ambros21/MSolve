@@ -22,6 +22,7 @@ namespace ISAAR.MSolve.FEM.Entities
         private readonly IList<MassAccelerationLoad> massAccelerationLoads = new List<MassAccelerationLoad>();
         private readonly IList<IMassAccelerationHistoryLoad> massAccelerationHistoryLoads = new List<IMassAccelerationHistoryLoad>();
         private readonly IList<ElementMassAccelerationHistoryLoad> elementMassAccelerationHistoryLoads = new List<ElementMassAccelerationHistoryLoad>();
+        private readonly IList<ITimeDependentNodalLoad> timeDependentNodalLoads = new List<ITimeDependentNodalLoad>();
 
         #region Properties
         //public IList<EmbeddedNode> EmbeddedNodes
@@ -103,6 +104,11 @@ namespace ISAAR.MSolve.FEM.Entities
         public IList<ElementMassAccelerationHistoryLoad> ElementMassAccelerationHistoryLoads
         {
             get { return elementMassAccelerationHistoryLoads; }
+        }
+
+        public IList<ITimeDependentNodalLoad> TimeDependentNodalLoads
+        {
+            get { return timeDependentNodalLoads; }
         }
 
         public Dictionary<int, Dictionary<DOFType, int>> NodalDOFsDictionary
@@ -273,6 +279,7 @@ namespace ISAAR.MSolve.FEM.Entities
             AssignElementMassLoads();
             AssignMassAccelerationLoads();
         }
+
         public void AssignMassAccelerationHistoryLoads(int timeStep)
         {
             if (massAccelerationHistoryLoads.Count > 0)
@@ -293,6 +300,18 @@ namespace ISAAR.MSolve.FEM.Entities
                 load.Element.Subdomain.AddLocalVectorToGlobal(load.Element,
                     load.Element.ElementType.CalculateAccelerationForces(load.Element, (new MassAccelerationLoad[] { hl }).ToList()),
                     load.Element.Subdomain.Forces);
+            }
+        }
+
+        public void AssignTimeDependentNodalLoads(int timeStep)
+        {
+            foreach (ITimeDependentNodalLoad load in timeDependentNodalLoads)
+            {
+                foreach (Subdomain subdomain in load.Node.SubdomainsDictionary.Values)
+                {
+                    int dof = subdomain.NodalDOFsDictionary[load.Node.ID][load.DOF];
+                    if (dof >= 0) subdomain.Forces[dof] = load.GetLoadAmount(timeStep) / load.Node.SubdomainsDictionary.Count;
+                }
             }
         }
 
