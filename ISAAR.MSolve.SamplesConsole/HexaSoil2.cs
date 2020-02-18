@@ -335,7 +335,7 @@ namespace ISAAR.MSolve.SamplesConsole
                 }
             }
         }
-        public static void MakeHexaSoil(Model model,double Stoch1,double Stoch2,double[] Stoch3, double[] omega)
+        public static void MakeHexaSoil(Model model,double Stoch1,double Stoch2,double Stoch3)
         {
             // xreiazetai na rythmizei kaneis ta megethi me auto to configuration
             var startX = 0.0;
@@ -448,23 +448,27 @@ namespace ISAAR.MSolve.SamplesConsole
                         gaussPointMaterials[i] = new KavvadasClays(Stoch1,Stoch2, 1, ksi, initialStresses);
                     }
                     elementType2 = new Hexa8u8p(gaussPointMaterials);
-                    for (int i = 0; i < gpNo; i++)
+                    //for (int i = 0; i < gpNo; i++)
+                    //{
+                    //    var ActualZeta = 0.0;
+                    //    var help = elementType1.CalcH8Shape(gaussPoints[i].Xi, gaussPoints[i].Eta, gaussPoints[i].Zeta);
+                    //    for (int j = 0; j < gpNo; j++)
+                    //    {
+                    //        ActualZeta += help[j] * nodeCoordinates[j, 2];
+                    //    }
+                    //    for (int j = 0; j < 8; j = j + 2)
+                    //    {
+                    //        elementType2.Permeability[i] += Stoch3[j] * Math.Cos(omega[j] * ActualZeta);
+                    //    }
+                    //    for (int j = 1; j < 8; j = j + 2)
+                    //    {
+                    //        elementType2.Permeability[i] += Stoch3[j] * Math.Sin(omega[j] * ActualZeta);
+                    //    }
+                    //    elementType2.Permeability[i] = Math.Abs((elementType2.Permeability[i]) * 0.25 * Math.Pow(10, -8) + Math.Pow(10, -8)) / 1;
+                    //}
+                    for (int i=0; i<gpNo; i++)
                     {
-                        var ActualZeta = 0.0;
-                        var help = elementType1.CalcH8Shape(gaussPoints[i].Xi, gaussPoints[i].Eta, gaussPoints[i].Zeta);
-                        for (int j = 0; j < gpNo; j++)
-                        {
-                            ActualZeta += help[j] * nodeCoordinates[j, 2];
-                        }
-                        for (int j = 0; j < 8; j = j + 2)
-                        {
-                            elementType2.Permeability[i] += Stoch3[j] * Math.Cos(omega[j] * ActualZeta);
-                        }
-                        for (int j = 1; j < 8; j = j + 2)
-                        {
-                            elementType2.Permeability[i] += Stoch3[j] * Math.Sin(omega[j] * ActualZeta);
-                        }
-                        elementType2.Permeability[i] = Math.Abs((elementType2.Permeability[i]) * 0.25 * Math.Pow(10, -8) + Math.Pow(10, -8)) / 1;
+                        elementType2.Permeability[i] = Stoch3;
                     }
                     e1 = new Element()
                     {
@@ -616,9 +620,9 @@ namespace ISAAR.MSolve.SamplesConsole
                 nodalLoad = 0.0;
                 foreach (Element elementcheck in model.ElementsDictionary.Values)
                 {
-                    var Pa = -375.0;
-                    var P2a = -750.0 / 2;
-                    var P4a = -1500.0 / 4;
+                    var Pa = -3750.0;
+                    var P2a = -7500.0 / 2;
+                    var P4a = -15000.0 / 4;
                     var bool1 = elementcheck.NodesDictionary.ContainsValue(nodecheck);
                     var bool2 = nodecheck.Z == hz;
                     var bool3 = (nodecheck.X == 0 || nodecheck.X == hx) && (nodecheck.Y == 0 || nodecheck.Y == hy);

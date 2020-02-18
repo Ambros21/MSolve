@@ -31,9 +31,9 @@ namespace ISAAR.MSolve.SamplesConsole
     {
         public static double[] Stoch1;
         public static double[] Stoch2;
-        public static double[,] Stoch3;
+        public static double[] Stoch3;
         public static double[] increments;
-        public static int montecarlosim = 1;
+        public static int montecarlosim = 1000;
         public static double[] dispstoch = new double[montecarlosim];
         public static double[] stresstoch = new double[montecarlosim];
         #region readwritemethods
@@ -582,13 +582,13 @@ namespace ISAAR.MSolve.SamplesConsole
             parentAnalyzer.Initialize();
             parentAnalyzer.Solve(); 
         }
-        private static void SolveStochasticHexaSoil(int samplenumber, double Stoch1, double Stoch2, double[] Stoch3, double[] omega)
+        private static void SolveStochasticHexaSoil(int samplenumber, double Stoch1, double Stoch2, double Stoch3)
         {
             VectorExtensions.AssignTotalAffinityCount();
             Model model = new Model();
             model.SubdomainsDictionary.Add(1, new Subdomain() { ID = 1 });
 
-            HexaSoil2.MakeHexaSoil(model, Stoch1, Stoch2, Stoch3, omega);
+            HexaSoil2.MakeHexaSoil(model, Stoch1, Stoch2, Stoch3);
 
             model.ConnectDataStructures();
             var linearSystems = new Dictionary<int, ILinearSystem>();
@@ -631,10 +631,12 @@ namespace ISAAR.MSolve.SamplesConsole
             DateTime begin = DateTime.Now;
             readData("input1.txt", out Stoch1);
             readData("input2.txt", out Stoch2);
-            readMatrixData("input3.txt", out Stoch3);
+            readData("input3.txt", out Stoch3);
             for (int index = 0; index < montecarlosim; index++)
             {
-                SolveStochasticHexaSoil(index, Stoch1[index], Stoch2[index], readMatrixDataPartially(Stoch3, index, index, 0, 7), readMatrixDataPartially(Stoch3, 0, 7, 8, 8));
+                //SolveStochasticHexaSoil(index, Stoch1[index], Stoch2[index], readMatrixDataPartially(Stoch3, index, index, 0, 7), readMatrixDataPartially(Stoch3, 0, 7, 8, 8));
+                SolveStochasticHexaSoil(index, Stoch1[index], Stoch2[index], Stoch3[index]);
+                Console.WriteLine(index);
             }
             DateTime end = DateTime.Now;
             writeTime(begin, end);
