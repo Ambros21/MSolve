@@ -23,6 +23,14 @@ namespace ISAAR.MSolve.Analyzers
         /// </summary>
         public double[] displacements;
         /// <summary>
+        /// An integer that indicates if we have failed or not. 0=Not Failure 1=Failure 
+        /// </summary>
+        public int fail = 0;
+        /// <summary>
+        /// An integer that indicates the step we have failed. If zero then no failure. 
+        /// </summary>
+        public int failinc = 0;
+        /// <summary>
         /// The number of dof we wish to monitor. It is decleared in Program.cs
         /// </summary>
         public int dofid;
@@ -34,7 +42,7 @@ namespace ISAAR.MSolve.Analyzers
         /// <summary>
         /// The maximum residual norm allowed, indicating that the algorithm diverges.
         /// </summary>
-        private static readonly double MAX_RESIDUAL_NORM_ALLOWED = 1.0e20;
+        private static readonly double MAX_RESIDUAL_NORM_ALLOWED = 2.0e0;
 
         /// <summary>
         /// Iterations after which the coefficient matrix is rebuilt.
@@ -44,7 +52,7 @@ namespace ISAAR.MSolve.Analyzers
         /// <summary>
         /// The error tolerance checked for convergence.
         /// </summary>
-        public double Tolerance { get; set; } = 0.9e-2;
+        public double Tolerance { get; set; } = 1.0e-5;
 
         /// <summary>
         /// The parent analyzer.
@@ -262,57 +270,115 @@ namespace ISAAR.MSolve.Analyzers
             DateTime end = DateTime.Now;
             StoreLogResults(start, end);
         }
+        //public void Solve(int currentincrement, int totalsteps)
+        //{
+        //    if (currentincrement == 0)
+        //    {
+        //        InitializeLogs();
+        //        displacements = new double[totalsteps];
+        //        //DateTime start = DateTime.Now;
+        //        this.loadFactor = 0.0;
+        //        this.initializeInternalVectors();
+        //    }
+        //    this.incrementalLoadFactor = this.loadIncrementsList[currentincrement];
+        //    this.loadFactor += this.incrementalLoadFactor;
+        //    this.clearIncrementalSolutionVector();
+        //    this.UpdateRightHandSide();
+
+        //    for (int step = 0; step < MAX_ITERATIOMS; step++)
+        //    {
+
+        //        this.solver.Solve();
+        //        double errorNorm = this.CalculateInternalRightHandSideNorm() / (this.rightHandSideNorm); //correction of the convergence criterion
+
+        //        if ((Double.IsNaN(errorNorm)) || (errorNorm >= MAX_RESIDUAL_NORM_ALLOWED))
+        //        {
+        //            throw new ArithmeticException("The redisual norm exceeded the maximum allowed value.");
+        //        }
+        //        if (Math.Abs(errorNorm) < this.Tolerance)
+        //        {
+        //            break;
+        //        }
+        //     //    Console.WriteLine("NR {0}, iteration: {1}, error: {2}", currentincrement, step, errorNorm);
+
+        //        this.SplitResidualForcesToSubdomains();
+        //        if (((step + 1) % this.StepForMatrixRebuild) == 0)
+        //        {
+        //            provider.Reset();
+        //            this.BuildMatrices();
+        //            this.solver.Initialize();
+        //        }
+
+        //    }
+        //    this.SaveMaterialStateAndUpdateSolution();
+        //   //  Console.WriteLine(this.displacementMap[1][dofid]);
+        //    displacements[currentincrement] = this.displacementMap[1][dofid];
+
+
+        //        this.copySolutionToSubdomains(); //REMEMBER THE IF CLAUSE (CURRENTINCREMENT==TOTALSTEPS-1) NO NEED THIS IF CLAUSE
+
+        //    //DateTime end = DateTime.Now;
+        //    //StoreLogResults(start, end);
+        //}
         public void Solve(int currentincrement, int totalsteps)
         {
-            if (currentincrement == 0)
+            if (fail == 0)
             {
-                InitializeLogs();
-                displacements = new double[totalsteps];
-                //DateTime start = DateTime.Now;
-                this.loadFactor = 0.0;
-                this.initializeInternalVectors();
-            }
-            this.incrementalLoadFactor = this.loadIncrementsList[currentincrement];
-            this.loadFactor += this.incrementalLoadFactor;
-            this.clearIncrementalSolutionVector();
-            this.UpdateRightHandSide();
+                if (currentincrement == 0)
+                {
+                    InitializeLogs();
+                    displacements = new double[totalsteps];
+                    //DateTime start = DateTime.Now;
+                    this.loadFactor = 0.0;
+                    this.initializeInternalVectors();
+                }
+                this.incrementalLoadFactor = this.loadIncrementsList[currentincrement];
+                this.loadFactor += this.incrementalLoadFactor;
+                this.clearIncrementalSolutionVector();
+                this.UpdateRightHandSide();
 
-            for (int step = 0; step < MAX_ITERATIOMS; step++)
+                for (int step = 0; step < MAX_ITERATIOMS; step++)
+                {
+
+                    this.solver.Solve();
+                    double errorNorm = this.CalculateInternalRightHandSideNorm() / (this.rightHandSideNorm); //correction of the convergence criterion
+
+                    if ((Double.IsNaN(errorNorm)) || (errorNorm >= MAX_RESIDUAL_NORM_ALLOWED))
+                    {
+                        fail = 1;
+                        failinc = currentincrement;
+                        break;
+                    }
+                    if (Math.Abs(errorNorm) < this.Tolerance)
+                    {
+                        break;
+                    }
+                    //    Console.WriteLine("NR {0}, iteration: {1}, error: {2}", currentincrement, step, errorNorm);
+
+                    this.SplitResidualForcesToSubdomains();
+                    if (((step + 1) % this.StepForMatrixRebuild) == 0)
+                    {
+                        provider.Reset();
+                        this.BuildMatrices();
+                        this.solver.Initialize();
+                    }
+
+                }
+            }
+            if (fail == 0)
             {
+                this.SaveMaterialStateAndUpdateSolution();
+                Console.WriteLine(currentincrement);
+                Console.WriteLine(this.displacementMap[1][dofid]);
+                displacements[currentincrement] = this.displacementMap[1][dofid];
 
-                this.solver.Solve();
-                double errorNorm = this.CalculateInternalRightHandSideNorm() / (this.rightHandSideNorm); //correction of the convergence criterion
 
-                if ((Double.IsNaN(errorNorm)) || (errorNorm >= MAX_RESIDUAL_NORM_ALLOWED))
-                {
-                    throw new ArithmeticException("The redisual norm exceeded the maximum allowed value.");
-                }
-                if (Math.Abs(errorNorm) < this.Tolerance)
-                {
-                    break;
-                }
-             //    Console.WriteLine("NR {0}, iteration: {1}, error: {2}", currentincrement, step, errorNorm);
-
-                this.SplitResidualForcesToSubdomains();
-                if (((step + 1) % this.StepForMatrixRebuild) == 0)
-                {
-                    provider.Reset();
-                    this.BuildMatrices();
-                    this.solver.Initialize();
-                }
-
-            }
-            this.SaveMaterialStateAndUpdateSolution();
-           //  Console.WriteLine(this.displacementMap[1][dofid]);
-            displacements[currentincrement] = this.displacementMap[1][dofid];
-           
-            
                 this.copySolutionToSubdomains(); //REMEMBER THE IF CLAUSE (CURRENTINCREMENT==TOTALSTEPS-1) NO NEED THIS IF CLAUSE
-            
-            //DateTime end = DateTime.Now;
-            //StoreLogResults(start, end);
-        }
 
+                //DateTime end = DateTime.Now;
+                //StoreLogResults(start, end);
+            }
+        }
         private double CalculateInternalRightHandSideNorm()
         {
             this.globalRightHandSide.Clear();

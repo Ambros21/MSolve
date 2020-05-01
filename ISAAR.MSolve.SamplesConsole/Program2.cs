@@ -24,7 +24,7 @@ namespace ISAAR.MSolve.SamplesConsole
         public static double[,] Stoch3;
         public static int montecarlosim = 1;
         public static double[] increments;
-        public static double[] dispstoch = new double[montecarlosim];
+        public static double[] dispstoch = new double[2*montecarlosim];
         public static double[] stresstoch = new double[montecarlosim];
         #region readwritemethods
         public static void readData(string DataFileName, out double[] array)
@@ -64,6 +64,38 @@ namespace ISAAR.MSolve.SamplesConsole
 
             StreamWriter wStream;
             filename = "displacements.txt";
+            wStream = File.CreateText(filename);
+            if (identifier == 1)
+            {
+                for (int i = 0; i < array.GetLength(0); i++)
+                {
+                    dataLine = String.Format(fmtSpecifier, array[i]);
+                    wStream.WriteLine(dataLine);
+                }
+                wStream.Close();
+            }
+            else
+            {
+                dataLine = String.Format(fmtSpecifier, array[array.GetLength(0) - 1]);
+                wStream.WriteLine(dataLine);
+                wStream.Close();
+            }
+        }
+        public static void writeData(double[] array, int identifier,string filename)
+        {
+            string  dataLine;
+            // The identifier is for telling if you want to write the whole array (1) or the last element (0) (for example the whole displacement curve or the last increment)
+            // To insert spaces, use the simple space character " ", not tabs (i.e. "\t"). 
+            // the editors do not 'interpret' the tabs in the same way, 
+            // so if you open the file with different editors can be a mess.
+            //string spaces1 = "        ";
+            //string spaces2 = "              ";
+
+            // format specifier to write the real numbers
+            string fmtSpecifier = "{0: 0.0000E+00;-0.0000E+00}";
+
+            StreamWriter wStream;
+            
             wStream = File.CreateText(filename);
             if (identifier == 1)
             {
@@ -175,12 +207,15 @@ namespace ISAAR.MSolve.SamplesConsole
             NonLinearAnalyzerNewtonRaphsonNew analyzer = NonLinearAnalyzerNewtonRaphsonNew.nonLinearAnalyzerWithPrescribedIncrements(solver, solver.SubdomainsDictionary, provider, model.TotalDOFs, increments);
             //StaticAnalyzer parentAnalyzer = new StaticAnalyzer(provider, analyzer, solver.SubdomainsDictionary);
 
-            NewmarkDynamicAnalyzer parentAnalyzer = new NewmarkDynamicAnalyzer(provider, analyzer, solver.SubdomainsDictionary, 0.25, 0.5, 0.1, 0.51);
+            NewmarkDynamicAnalyzer parentAnalyzer = new NewmarkDynamicAnalyzer(provider, analyzer, solver.SubdomainsDictionary, 0.25, 0.5, 0.1, 80.01);
             analyzer.dofid = HexaSoil2.ProvideIdMonitor(model);
             parentAnalyzer.BuildMatrices();
             parentAnalyzer.Initialize();
             parentAnalyzer.Solve();
-            dispstoch[samplenumber] = analyzer.displacements[4];
+            dispstoch[samplenumber] = analyzer.displacements[analyzer.failinc-1];
+            dispstoch[samplenumber + montecarlosim] = analyzer.displacements[149];
+            stresstoch[samplenumber] = analyzer.failinc-1;
+            //writeData(analyzer.displacements, 1);
             //Hexa8 h1 = (Hexa8)model.Elements[92].ElementType;
             //IFiniteElementMaterial3D[] matGP = new IFiniteElementMaterial3D[6];
             //matGP = h1.materialsAtGaussPoints;
@@ -207,15 +242,16 @@ namespace ISAAR.MSolve.SamplesConsole
             //{
             //    SolveStochasticHexaSoil(1, Stoch1[1], Stoch2[1]);
             //}
-            //Parallel.For (0, montecarlosim,
+            //Parallel.For(0, montecarlosim-1,
             //      index =>
             //      {
-            //          SolveStochasticHexaSoil(index, Stoch1[index+250], Stoch2[index+250], readMatrixDataPartially(Stoch3,index+250,index+250,0,7),readMatrixDataPartially(Stoch3,0,7,8,8));
-            //      }) ;
+            //          SolveStochasticHexaSoil(index, Stoch1[index], Stoch2[index], readMatrixDataPartially(Stoch3, index, index, 0, 7), readMatrixDataPartially(Stoch3, 0, 7, 8, 8));
+            //          Console.WriteLine(index);
+            //      });
             DateTime end = DateTime.Now;
             writeTime(begin, end);
-            writeData(dispstoch, 1);
-            //writeData(stresstoch, 1);
+            //writeData(dispstoch, 1,"displacements.txt");
+            writeData(stresstoch, 1,"stresses.txt");
         }
         #endregion
         #region FiberBeamCode

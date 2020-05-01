@@ -573,9 +573,9 @@ namespace ISAAR.MSolve.SamplesConsole
                 };
                 foreach (Element elementcheck in model.ElementsDictionary.Values)
                 {
-                    var Pa = -3750.0;
-                    var P2a = -7500.0 / 2;
-                    var P4a = -15000.0 / 4;
+                    var Pa = -20000.0;
+                    var P2a = -40000.0 / 2;
+                    var P4a = -80000.0 / 4;
                     var bool1 = elementcheck.NodesDictionary.ContainsValue(nodecheck);
                     var bool2 = nodecheck.Z == hz;
                     var bool3 = (nodecheck.X == 0 || nodecheck.X == hx) && (nodecheck.Y == 0 || nodecheck.Y == hy);
