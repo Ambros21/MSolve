@@ -22,10 +22,12 @@ namespace ISAAR.MSolve.SamplesConsole
         public static double[] Stoch1;
         public static double[] Stoch2;
         public static double[,] Stoch3;
-        public static int montecarlosim = 1;
+        public static int montecarlosim;
+        public static int indexbegin;
         public static double[] increments;
-        public static double[] dispstoch = new double[2*montecarlosim];
-        public static double[] stresstoch = new double[montecarlosim];
+        public static double[] dispstoch;
+        public static double[] dispstoch150;
+        public static double[] stresstoch;
         #region readwritemethods
         public static void readData(string DataFileName, out double[] array)
         {
@@ -207,13 +209,13 @@ namespace ISAAR.MSolve.SamplesConsole
             NonLinearAnalyzerNewtonRaphsonNew analyzer = NonLinearAnalyzerNewtonRaphsonNew.nonLinearAnalyzerWithPrescribedIncrements(solver, solver.SubdomainsDictionary, provider, model.TotalDOFs, increments);
             //StaticAnalyzer parentAnalyzer = new StaticAnalyzer(provider, analyzer, solver.SubdomainsDictionary);
 
-            NewmarkDynamicAnalyzer parentAnalyzer = new NewmarkDynamicAnalyzer(provider, analyzer, solver.SubdomainsDictionary, 0.25, 0.5, 0.1, 80.01);
+            NewmarkDynamicAnalyzer parentAnalyzer = new NewmarkDynamicAnalyzer(provider, analyzer, solver.SubdomainsDictionary, 0.25, 0.5, 0.1, 100.01);
             analyzer.dofid = HexaSoil2.ProvideIdMonitor(model);
             parentAnalyzer.BuildMatrices();
             parentAnalyzer.Initialize();
             parentAnalyzer.Solve();
             dispstoch[samplenumber] = analyzer.displacements[analyzer.failinc-1];
-            dispstoch[samplenumber + montecarlosim] = analyzer.displacements[149];
+            dispstoch150[samplenumber] = analyzer.displacements[149];
             stresstoch[samplenumber] = analyzer.failinc-1;
             //writeData(analyzer.displacements, 1);
             //Hexa8 h1 = (Hexa8)model.Elements[92].ElementType;
@@ -234,9 +236,17 @@ namespace ISAAR.MSolve.SamplesConsole
             readData("input2.txt", out Stoch2);
             readMatrixData("input3.txt", out Stoch3);
             readData("timefun.txt", out increments);
-            for (int index = 0; index < montecarlosim; index++)
+            Console.WriteLine("Provide the initial index. Dont forget we have zero indexing.");
+            indexbegin = Int32.Parse(Console.ReadLine());
+            Console.WriteLine("Provide the final index.");
+            montecarlosim = Int32.Parse(Console.ReadLine());
+            dispstoch = new double[montecarlosim - indexbegin];
+            dispstoch150 = new double[montecarlosim - indexbegin];
+            stresstoch = new double[montecarlosim - indexbegin];
+            for (int index = indexbegin; index < montecarlosim; index++)
             {
                 SolveStochasticHexaSoil(index, Stoch1[index], Stoch2[index], readMatrixDataPartially(Stoch3, index, index, 0, 7), readMatrixDataPartially(Stoch3, 0, 7, 8, 8));
+                Console.WriteLine(index);
             }
             //for (int i = 0; i < 1; i++)
             //{
@@ -250,7 +260,8 @@ namespace ISAAR.MSolve.SamplesConsole
             //      });
             DateTime end = DateTime.Now;
             writeTime(begin, end);
-            //writeData(dispstoch, 1,"displacements.txt");
+            writeData(dispstoch, 1,"displacements.txt");
+            writeData(dispstoch150, 1, "displacements150.txt");
             writeData(stresstoch, 1,"stresses.txt");
         }
         #endregion

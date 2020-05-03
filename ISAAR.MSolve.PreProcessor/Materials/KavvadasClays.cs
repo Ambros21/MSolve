@@ -124,7 +124,7 @@ namespace ISAAR.MSolve.PreProcessor.Materials
                  Kmax = 0.001;
                  Kmin = 0.001;
                  }                
-                var Htot = 20;
+                var Htot = 50;
                 var Niso = 2.15;//2.08053; //Note that 2*astar is related with the Initial Stresses in X and Y axes (SX=(2*astar-gamma*zeta)/2 for OCR=3)
                 this.Stresses = new double[6];
                 this.PAR = new double[20];

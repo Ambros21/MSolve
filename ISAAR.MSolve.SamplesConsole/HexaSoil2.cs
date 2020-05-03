@@ -315,9 +315,9 @@ namespace ISAAR.MSolve.SamplesConsole
             var LengthY = 10.0;
             var LengthZ = 10.0;
             int nodeID = 1;
-            var hx = 80.0;
-            var hy = 80.0;
-            var hz = 20.0;
+            var hx = 200.0;
+            var hy = 200.0;
+            var hz = 50.0;
             var imax = (int)Math.Truncate(hx / LengthX) + 1;
             var jmax = (int)Math.Truncate(hy / LengthY) + 1;
             var kmax = (int)Math.Truncate(hz / LengthZ) + 1;
@@ -573,9 +573,9 @@ namespace ISAAR.MSolve.SamplesConsole
                 };
                 foreach (Element elementcheck in model.ElementsDictionary.Values)
                 {
-                    var Pa = -20000.0;
-                    var P2a = -40000.0 / 2;
-                    var P4a = -80000.0 / 4;
+                    var Pa = -25000.0;
+                    var P2a = -50000.0 / 2;
+                    var P4a = -100000.0 / 4;
                     var bool1 = elementcheck.NodesDictionary.ContainsValue(nodecheck);
                     var bool2 = nodecheck.Z == hz;
                     var bool3 = (nodecheck.X == 0 || nodecheck.X == hx) && (nodecheck.Y == 0 || nodecheck.Y == hy);
@@ -629,9 +629,9 @@ namespace ISAAR.MSolve.SamplesConsole
             var LengthX = 10.0;
             var LengthY = 10.0;
             var LengthZ = 10.0;
-            var hx = 80.0;
-            var hy = 80.0;
-            var hz = 20.0;
+            var hx = 200.0;
+            var hy = 200.0;
+            var hz = 50.0;
             var imax = (int)Math.Truncate(hx / LengthX) + 1;
             var jmax = (int)Math.Truncate(hy / LengthY) + 1;
             var kmax = (int)Math.Truncate(hz / LengthZ) + 1;
@@ -659,7 +659,7 @@ namespace ISAAR.MSolve.SamplesConsole
                         {
                             if (boolx && booly && boolz == true)
                             {
-                                Monitor = 4*nodeid-2+81;
+                                Monitor = 4*nodeid-2+441;
                             }
                         }
                         if (Z != 0)
