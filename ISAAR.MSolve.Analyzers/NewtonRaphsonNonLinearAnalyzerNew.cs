@@ -320,7 +320,7 @@ namespace ISAAR.MSolve.Analyzers
         //    //DateTime end = DateTime.Now;
         //    //StoreLogResults(start, end);
         //}
-        public void Solve(int currentincrement, int totalsteps)
+        public int Solve(int currentincrement, int totalsteps)
         {
             if (fail == 0)
             {
@@ -378,6 +378,7 @@ namespace ISAAR.MSolve.Analyzers
                 //DateTime end = DateTime.Now;
                 //StoreLogResults(start, end);
             }
+            return fail;
         }
         private double CalculateInternalRightHandSideNorm()
         {

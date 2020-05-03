@@ -106,9 +106,9 @@ namespace ISAAR.MSolve.Analyzers
         //        foreach (var e in subdomain.ElementsDictionary.Values.Where(e => e.ElementType is IStochasticFiniteElement))
         //            ((IStochasticFiniteElement)e.ElementType).CoefficientsProvider = coefficientsProvider;
         //}
-        public void Solve(int h, int j)
+        public int Solve(int h, int j)
         {
-
+            return h;
         }
         #region IAnalyzer Members
 

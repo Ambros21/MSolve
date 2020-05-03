@@ -58,9 +58,9 @@ namespace ISAAR.MSolve.Analyzers
             if (childAnalyzer == null) throw new InvalidOperationException("Static analyzer must contain an embedded analyzer.");
             childAnalyzer.Solve();
         }
-        public void Solve(int h, int j)
+        public int Solve(int h, int j)
         {
-
+            return h;
         }
         public void BuildMatrices()
         {

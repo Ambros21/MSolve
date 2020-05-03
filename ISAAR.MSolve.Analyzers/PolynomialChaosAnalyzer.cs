@@ -270,9 +270,9 @@ namespace ISAAR.MSolve.Analyzers
 
             return psii;
         }
-        public void Solve(int h, int j)
+        public int Solve(int h, int j)
         {
-
+            return h;
         }
         //function [Psi] = EvaluatePsi(PC,ksi);
         // PsiSize = size(PC.PC.PsiBasis,1);

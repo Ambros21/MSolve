@@ -209,14 +209,14 @@ namespace ISAAR.MSolve.SamplesConsole
             NonLinearAnalyzerNewtonRaphsonNew analyzer = NonLinearAnalyzerNewtonRaphsonNew.nonLinearAnalyzerWithPrescribedIncrements(solver, solver.SubdomainsDictionary, provider, model.TotalDOFs, increments);
             //StaticAnalyzer parentAnalyzer = new StaticAnalyzer(provider, analyzer, solver.SubdomainsDictionary);
 
-            NewmarkDynamicAnalyzer parentAnalyzer = new NewmarkDynamicAnalyzer(provider, analyzer, solver.SubdomainsDictionary, 0.25, 0.5, 0.1, 100.01);
+            NewmarkDynamicAnalyzer parentAnalyzer = new NewmarkDynamicAnalyzer(provider, analyzer, solver.SubdomainsDictionary, 0.25, 0.5, 0.1, 200.01);
             analyzer.dofid = HexaSoil2.ProvideIdMonitor(model);
             parentAnalyzer.BuildMatrices();
             parentAnalyzer.Initialize();
             parentAnalyzer.Solve();
             dispstoch[samplenumber] = analyzer.displacements[analyzer.failinc-1];
             dispstoch150[samplenumber] = analyzer.displacements[149];
-            stresstoch[samplenumber] = analyzer.failinc-1;
+            stresstoch[samplenumber] = analyzer.failinc;
             //writeData(analyzer.displacements, 1);
             //Hexa8 h1 = (Hexa8)model.Elements[92].ElementType;
             //IFiniteElementMaterial3D[] matGP = new IFiniteElementMaterial3D[6];

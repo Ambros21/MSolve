@@ -38,9 +38,9 @@ namespace ISAAR.MSolve.Analyzers
 
         public Dictionary<int, LinearAnalyzerLogFactory> LogFactories { get { return logFactories; } }
         public ISolver Solver { get { return solver; } }
-        public void Solve(int h, int j)
+        public int Solve(int h, int j)
         {
-
+            return h;
         }
         #region IAnalyzer Members
 

@@ -34,6 +34,7 @@ namespace ISAAR.MSolve.Analyzers
         private readonly IImplicitIntegrationProvider provider;
         private IAnalyzer childAnalyzer;
         private IAnalyzer parentAnalyzer;
+        private int fail;
 
         public NewmarkDynamicAnalyzer(IImplicitIntegrationProvider provider, IAnalyzer embeddedAnalyzer, IDictionary<int, ISolverSubdomain> subdomains,
             double alpha, double delta, double timeStep, double totalTime)
@@ -280,26 +281,29 @@ namespace ISAAR.MSolve.Analyzers
         public void Solve()
         {
             if (childAnalyzer == null) throw new InvalidOperationException("Static analyzer must contain an embedded analyzer.");
-
+            
             for (int i = 0; i < (int)(totalTime / timeStep); i++)
             {
-                Debug.WriteLine("Newmark step: {0}", i);
-                provider.GetRHSFromHistoryLoad(i); //SPOT THE ERROR IS HERE
-                InitializeRHSs();
-                // ProcessRHS
-                CalculateRHSImplicit();
-                DateTime start = DateTime.Now;
-                childAnalyzer.Solve(i,(int)(totalTime/timeStep)); // this was in order to have a proper dynamic solver in newton raphson
-                DateTime end = DateTime.Now;
-                UpdateVelocityAndAcceleration();
-                UpdateResultStorages(start, end);
+                if (fail == 0)
+                {
+                    Debug.WriteLine("Newmark step: {0}", i);
+                    provider.GetRHSFromHistoryLoad(i); //SPOT THE ERROR IS HERE
+                    InitializeRHSs();
+                    // ProcessRHS
+                    CalculateRHSImplicit();
+                    DateTime start = DateTime.Now;
+                    fail = childAnalyzer.Solve(i, (int)(totalTime / timeStep)); // this was in order to have a proper dynamic solver in newton raphson
+                    DateTime end = DateTime.Now;
+                    UpdateVelocityAndAcceleration();
+                    UpdateResultStorages(start, end);
+                }
             }
             
             //childAnalyzer.Solve();
         }
-        public void Solve(int h, int j)
+        public int Solve(int h, int j)
         {
-
+            return h;
         }
         private void UpdateVelocityAndAcceleration()
         {

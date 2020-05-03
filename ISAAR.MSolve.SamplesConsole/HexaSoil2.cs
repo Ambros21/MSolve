@@ -11,6 +11,19 @@ namespace ISAAR.MSolve.SamplesConsole
 {
     public class HexaSoil2
     {
+        public static double startX = 0.0;
+        public static double startY = 0.0;
+        public static double startZ = 0.0;
+        public static double LengthX = 10.0;
+        public static double LengthY = 10.0;
+        public static double LengthZ = 10.0;
+        int nodeID = 1;
+        public static double hx = 80.0;
+        public static double hy = 80.0;
+        public static double hz = 20.0;
+        public static int imax = (int)Math.Truncate(hx / LengthX) + 1;
+        public static int jmax = (int)Math.Truncate(hy / LengthY) + 1;
+        public static int kmax = (int)Math.Truncate(hz / LengthZ) + 1;
         public static void MakeHexaSoil(Model model)
         {
             //edafos 20*200*200/10*10*10 xreiazetai na rythmizei kaneis ta megethi me auto to configuration
@@ -105,7 +118,7 @@ namespace ISAAR.MSolve.SamplesConsole
                         initialStresses[3] = 0;
                         initialStresses[4] = 0;
                         initialStresses[5] = 0;
-                        gaussPointMaterials[i] = new KavvadasClays(young, poisson, alpha, ksi, initialStresses);
+                        gaussPointMaterials[i] = new KavvadasClays(young, poisson, alpha, ksi, initialStresses,Htot);
                     }
                     elementType1 = new Hexa8(gaussPointMaterials);
                     e1 = new Element()
@@ -308,19 +321,7 @@ namespace ISAAR.MSolve.SamplesConsole
         public static void MakeHexaSoil(Model model, double Stoch1, double Stoch2, double[] Stoch3, double[] omega)
         {
             // xreiazetai na rythmizei kaneis ta megethi me auto to configuration
-            var startX = 0.0;
-            var startY = 0.0;
-            var startZ = 0.0;
-            var LengthX = 10.0;
-            var LengthY = 10.0;
-            var LengthZ = 10.0;
             int nodeID = 1;
-            var hx = 200.0;
-            var hy = 200.0;
-            var hz = 50.0;
-            var imax = (int)Math.Truncate(hx / LengthX) + 1;
-            var jmax = (int)Math.Truncate(hy / LengthY) + 1;
-            var kmax = (int)Math.Truncate(hz / LengthZ) + 1;
             for (int l = 0; l < kmax; l++)
             {
                 for (int k = 0; k < jmax; k++)
@@ -400,7 +401,7 @@ namespace ISAAR.MSolve.SamplesConsole
                         initialStresses[3] = 0;
                         initialStresses[4] = 0;
                         initialStresses[5] = 0;
-                        gaussPointMaterials[i] = new KavvadasClays(Stoch1, Stoch2, 1, ksi, initialStresses);
+                        gaussPointMaterials[i] = new KavvadasClays(Stoch1, Stoch2, 1, ksi, initialStresses,Htot);
                     }
                     //elementType1 = new Hexa8(gaussPointMaterials);
                     elementType2 = new Hexa8u8p(gaussPointMaterials);
@@ -573,9 +574,9 @@ namespace ISAAR.MSolve.SamplesConsole
                 };
                 foreach (Element elementcheck in model.ElementsDictionary.Values)
                 {
-                    var Pa = -25000.0;
-                    var P2a = -50000.0 / 2;
-                    var P4a = -100000.0 / 4;
+                    var Pa = -50000.0;
+                    var P2a = -100000.0 / 2;
+                    var P4a = -200000.0 / 4;
                     var bool1 = elementcheck.NodesDictionary.ContainsValue(nodecheck);
                     var bool2 = nodecheck.Z == hz;
                     var bool3 = (nodecheck.X == 0 || nodecheck.X == hx) && (nodecheck.Y == 0 || nodecheck.Y == hy);
@@ -623,18 +624,6 @@ namespace ISAAR.MSolve.SamplesConsole
         {
             //works only in the case when all the points are tottaly constrained. Note that the enumeration is beginning for the free dofs and
             //counts only for them. Later we may make it more general this method.
-            var startX = 0.0;
-            var startY = 0.0;
-            var startZ = 0.0;
-            var LengthX = 10.0;
-            var LengthY = 10.0;
-            var LengthZ = 10.0;
-            var hx = 200.0;
-            var hy = 200.0;
-            var hz = 50.0;
-            var imax = (int)Math.Truncate(hx / LengthX) + 1;
-            var jmax = (int)Math.Truncate(hy / LengthY) + 1;
-            var kmax = (int)Math.Truncate(hz / LengthZ) + 1;
             var nodeid = 1;
             var mx = hx/2;
             var my = hy/2;
@@ -659,7 +648,7 @@ namespace ISAAR.MSolve.SamplesConsole
                         {
                             if (boolx && booly && boolz == true)
                             {
-                                Monitor = 4*nodeid-2+441;
+                                Monitor = 4*nodeid-2+81;
                             }
                         }
                         if (Z != 0)

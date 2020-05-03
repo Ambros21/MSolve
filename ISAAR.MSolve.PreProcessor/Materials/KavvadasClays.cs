@@ -19,6 +19,7 @@ namespace ISAAR.MSolve.PreProcessor.Materials
         // Based on Kavvadas and Amorosi (2000) Belokas and Kalos investigations. We consider at first the edition of Kavvadas and Amorosi (2000) In the future it will be enriched with next editions. First Edition is on July 2016. Associative plasticity only in the current edition
         //Fields and properties
         public double Zeta { get; set; }
+        public double Htot;
         public double Kmax;
         public double Kmin;
         public IMatrix2D<double> ConstitutiveMatrix { get; set; }
@@ -70,7 +71,7 @@ namespace ISAAR.MSolve.PreProcessor.Materials
             this.ConstitutiveMatrix = ConstitutiveMatrix;
 
             KavvadasClays m = new KavvadasClays(
-                this.YoungModulus, this.PoissonRatio, this.shearModulus, this.ksi, this.initialStresses)
+                this.YoungModulus, this.PoissonRatio, this.shearModulus, this.ksi, this.initialStresses,this.Htot)
             {
                 modified = this.Modified,
                 plasticStrain = this.plasticStrain,
@@ -109,7 +110,7 @@ namespace ISAAR.MSolve.PreProcessor.Materials
         public KavvadasClays(double youngModulus, double poissonRatio, double alpha, double ksi)
         {
         }
-        public KavvadasClays(double youngModulus, double poissonRatio, double alpha, double ksi, double[] initialStresses) : this(youngModulus, poissonRatio, alpha, ksi)
+        public KavvadasClays(double youngModulus, double poissonRatio, double alpha, double ksi, double[] initialStresses,double Htot) : this(youngModulus, poissonRatio, alpha, ksi)
         {
                 // if alpha=1 this is a stochastic use and we imply youngModulus and poissonRatio for giving the stochastic values.
                 var gamma = 10; //effective stress
@@ -123,8 +124,8 @@ namespace ISAAR.MSolve.PreProcessor.Materials
                   {
                  Kmax = 0.001;
                  Kmin = 0.001;
-                 }                
-                var Htot = 50;
+                 }
+                this.Htot = Htot;
                 var Niso = 2.15;//2.08053; //Note that 2*astar is related with the Initial Stresses in X and Y axes (SX=(2*astar-gamma*zeta)/2 for OCR=3)
                 this.Stresses = new double[6];
                 this.PAR = new double[20];
@@ -132,7 +133,7 @@ namespace ISAAR.MSolve.PreProcessor.Materials
                 this.tempQH = new double[21];
                 for (int i = 0; i < 6; i++)
                     Stresses[i] = initialStresses[i];
-                PAR[3] = (Kmin - Kmax) * Zeta / Htot + Kmax;
+                PAR[3] = (Kmin - Kmax) * Zeta / this.Htot + Kmax;
                 PAR[2] = 10 * PAR[3];
                 var s0 = (Stresses[0] + Stresses[1] + Stresses[2]) / 3;
                 PAR[18] = 4;
