@@ -1,17 +1,16 @@
-﻿using System;
-using ISAAR.MSolve.Analyzers;
+﻿using ISAAR.MSolve.Analyzers;
+using ISAAR.MSolve.Analyzers.NonLinear;
+using ISAAR.MSolve.Logging;
+using System;
 using ISAAR.MSolve.Analyzers.Dynamic;
 using ISAAR.MSolve.Discretization.FreedomDegrees;
 using ISAAR.MSolve.FEM.Entities;
-using ISAAR.MSolve.Logging;
 using ISAAR.MSolve.Problems;
 using ISAAR.MSolve.Solvers;
 using ISAAR.MSolve.Solvers.Direct;
-using ISAAR.MSolve.LinearAlgebra;
 using MGroup.Stochastic;
 using MGroup.Stochastic.Structural;
 using MGroup.Stochastic.Structural.Example;
-using ISAAR.MSolve.Analyzers.NonLinear;
 using ISAAR.MSolve.PreProcessor;
 using ISAAR.MSolve.PreProcessor.Materials;
 using System.Collections.Generic;
@@ -24,126 +23,12 @@ using ISAAR.MSolve.Analyzers.Interfaces;
 
 namespace ISAAR.MSolve.SamplesConsole
 {
-    class Program
+    class Program2
     {
-        private const int subdomainID = 0;
-        #region Mgroupstuff
-        static void MgroupMain(string[] args)
-        {
-            //SolveBuildingInNoSoilSmall();
-            //TrussExample.Run();
-            //FEM.Cantilever2D.Run();
-            //FEM.Cantilever2DPreprocessor.Run();
-            //FEM.WallWithOpenings.Run();
-            //SeparateCodeCheckingClass.Check06();
-            //SolveBuildingInNoSoilSmall();
-            //SolveBuildingInNoSoilSmallDynamic();
-            //SolveStochasticMaterialBeam2DWithBruteForceMonteCarlo();
-            //CNTExamples.CNT_4_4_DisplacementControl();
-            //CNTExamples.CNT_4_4_NewtonRaphson();
-            //Tests.FEM.Shell8andCohesiveNonLinear.RunTest();
-            //AppliedDisplacementExample.Run();
-
-            //Logging.PrintForceDisplacementCurve.CantileverBeam2DCorotationalLoadControl();
-
-            //SuiteSparseBenchmarks.MemoryConsumptionDebugging();
-            //SolverBenchmarks.SuiteSparseMemoryConsumptionDebugging();
-            //NRNLAnalyzerDevelopTest.SolveDisplLoadsExample();
-            //SeparateCodeCheckingClass4.Check05bStressIntegrationObje_Integration();
-            //SeparateCodeCheckingClass4.Check_Graphene_rve_Obje_Integration();
-            //IntegrationElasticCantileverBenchmark.RunExample();
-            //OneRveExample.Check_Graphene_rve_serial();
-            //BondSlipTest.CheckStressStrainBonSlipMaterial();
-            //OneRveExample.Check_Graphene_rve_parallel();
-            //LinearRves.CheckShellScaleTransitionsAndMicrostructure();
-            //SolveCantileverWithStochasticMaterial();
-
-            //MeshPartitioningExamples.PartitionMeshes();
-
-        }
-
-        private static void SolveBuildingInNoSoilSmall()
-        {
-            var model = new Model();
-            model.SubdomainsDictionary.Add(subdomainID, new Subdomain(subdomainID));
-            BeamBuildingBuilder.MakeBeamBuilding(model, 20, 20, 20, 5, 4, model.NodesDictionary.Count + 1,
-                model.ElementsDictionary.Count + 1, subdomainID, 4, false, false);
-            model.Loads.Add(new Load() { Amount = -100, Node = model.Nodes[21], DOF = StructuralDof.TranslationX });
-
-            // Solver
-            var solverBuilder = new SkylineSolver.Builder();
-            ISolver solver = solverBuilder.BuildSolver(model);
-
-            // Structural problem provider
-            var provider = new ProblemStructural(model, solver);
-
-            // Linear static analysis
-            var childAnalyzer = new LinearAnalyzer(model, solver, provider);
-            var parentAnalyzer = new StaticAnalyzer(model, solver, provider, childAnalyzer);
-
-            // Request output
-            int monitorDof = 420;
-            childAnalyzer.LogFactories[subdomainID] = new LinearAnalyzerLogFactory(new int[] { monitorDof });
-
-            // Run the analysis
-            parentAnalyzer.Initialize();
-            parentAnalyzer.Solve();
-
-            // Write output
-            DOFSLog log = (DOFSLog)childAnalyzer.Logs[subdomainID][0]; //There is a list of logs for each subdomain and we want the first one
-            Console.WriteLine($"dof = {monitorDof}, u = {log.DOFValues[monitorDof]}");
-        }
-
-        private static void SolveBuildingInNoSoilSmallDynamic()
-        {
-            var model = new Model();
-            model.SubdomainsDictionary.Add(subdomainID, new Subdomain(subdomainID));
-            BeamBuildingBuilder.MakeBeamBuilding(model, 20, 20, 20, 5, 4, model.NodesDictionary.Count + 1,
-                model.ElementsDictionary.Count + 1, subdomainID, 4, false, false);
-
-            // Solver
-            var solverBuilder = new SkylineSolver.Builder();
-            ISolver solver = solverBuilder.BuildSolver(model);
-
-            // Structural problem provider
-            var provider = new ProblemStructural(model, solver);
-
-            // Linear static analysis
-            var childAnalyzer = new LinearAnalyzer(model, solver, provider);
-            var parentAnalyzerBuilder = new NewmarkDynamicAnalyzer.Builder(model, solver, provider, childAnalyzer, 0.01, 0.1);
-            parentAnalyzerBuilder.SetNewmarkParametersForConstantAcceleration(); // Not necessary. This is the default
-            NewmarkDynamicAnalyzer parentAnalyzer = parentAnalyzerBuilder.Build();
-
-            // Request output
-            int monitorDof = 420;
-            childAnalyzer.LogFactories[subdomainID] = new LinearAnalyzerLogFactory(new int[] { monitorDof });
-
-            // Run the analysis
-            parentAnalyzer.Initialize();
-            parentAnalyzer.Solve();
-
-            // Write output
-            DOFSLog log = (DOFSLog)childAnalyzer.Logs[subdomainID][0]; //There is a list of logs for each subdomain and we want the first one
-            Console.WriteLine($"dof = {monitorDof}, u = {log.DOFValues[monitorDof]}");
-
-            //TODO: No loads have been defined so the result is bound to be 0.
-        }
-
-        private static void SolveCantileverWithStochasticMaterial()
-        {
-            const int iterations = 1000;
-            const double youngModulus = 2.1e8;
-
-            var domainMapper = new CantileverStochasticDomainMapper(new[] { 0d, 0d, 0d });
-            var evaluator = new StructuralStochasticEvaluator(youngModulus, domainMapper);
-            var m = new MonteCarlo(iterations, evaluator, evaluator);
-            m.Evaluate();
-        }
-        #endregion
         #region HexaProgramCode
         public static double[] Stoch1;
         public static double[] Stoch2;
-        public static double[] Stoch3;
+        public static double[,] Stoch3;
         public static int montecarlosim;
         public static int indexbegin;
         public static double[] increments;
@@ -205,9 +90,9 @@ namespace ISAAR.MSolve.SamplesConsole
                 wStream.Close();
             }
         }
-        public static void writeData(double[] array, int identifier, string filename)
+        public static void writeData(double[] array, int identifier,string filename)
         {
-            string dataLine;
+            string  dataLine;
             // The identifier is for telling if you want to write the whole array (1) or the last element (0) (for example the whole displacement curve or the last increment)
             // To insert spaces, use the simple space character " ", not tabs (i.e. "\t"). 
             // the editors do not 'interpret' the tabs in the same way, 
@@ -219,7 +104,7 @@ namespace ISAAR.MSolve.SamplesConsole
             string fmtSpecifier = "{0: 0.0000E+00;-0.0000E+00}";
 
             StreamWriter wStream;
-
+            
             wStream = File.CreateText(filename);
             if (identifier == 1)
             {
@@ -296,21 +181,19 @@ namespace ISAAR.MSolve.SamplesConsole
         private static void SolveHexaSoil()
         {
         }
-        private static void SolveStochasticHexaSoil(int samplenumber, double Stoch1, double Stoch2, double Stoch3)
+        private static void SolveStochasticHexaSoil(int samplenumber, double Stoch1, double Stoch2, double[] Stoch3, double[] omega)
         {
             Model model = new Model();
             model.SubdomainsDictionary.Add(1, new Subdomain(1));
 
-            HexaSoil2.MakeHexaSoil(model, Stoch1, Stoch2, Stoch3);
+           // HexaSoil2.MakeHexaSoil(model, Stoch1, Stoch2, Stoch3, omega);
 
             model.ConnectDataStructures();
-           
+
             var solverBuilder = new SuiteSparseSolver.Builder();
-            //var solverBuilder = new SkylineSolver.Builder();
             ISolver solver = solverBuilder.BuildSolver(model);
 
-            var provider = new ProblemPorous(model, solver);
-            LibrarySettings.LinearAlgebraProviders = LinearAlgebraProviderChoice.MKL;
+            var provider = new ProblemPorous(model,solver);
 
             int increments = 1;
             var childAnalyzerBuilder = new LoadControlAnalyzer.Builder(model, solver, provider, increments);
@@ -318,13 +201,13 @@ namespace ISAAR.MSolve.SamplesConsole
             childAnalyzerBuilder.MaxIterationsPerIncrement = 100;
             childAnalyzerBuilder.NumIterationsForMatrixRebuild = 1;
             LoadControlAnalyzer childAnalyzer = childAnalyzerBuilder.Build();
-            var parentAnalyzerBuilder = new NewmarkDynamicAnalyzer.Builder(model, solver, provider, childAnalyzer, 0.1, 50.00);
+            var parentAnalyzerBuilder = new NewmarkDynamicAnalyzer.Builder(model, solver, provider, childAnalyzer, 0.01, 0.1);
             NewmarkDynamicAnalyzer parentAnalyzer = parentAnalyzerBuilder.Build();
 
             parentAnalyzer.Initialize();
             parentAnalyzer.Solve();
             int monitorDof = HexaSoil2.ProvideIdMonitor(model);
-           
+
             //dispstoch[samplenumber] = analyzer.displacements[analyzer.failinc-1];
             //dispstoch150[samplenumber] = analyzer.displacements[149];
             //stresstoch[samplenumber] = analyzer.failinc;
@@ -345,7 +228,8 @@ namespace ISAAR.MSolve.SamplesConsole
             DateTime begin = DateTime.Now;
             readData("input1.txt", out Stoch1);
             readData("input2.txt", out Stoch2);
-            readData("input3.txt", out Stoch3);
+            readMatrixData("input3.txt", out Stoch3);
+            readData("timefun.txt", out increments);
             Console.WriteLine("Provide the initial index. Dont forget we have zero indexing.");
             indexbegin = Int32.Parse(Console.ReadLine());
             Console.WriteLine("Provide the final index.");
@@ -355,8 +239,7 @@ namespace ISAAR.MSolve.SamplesConsole
             stresstoch = new double[montecarlosim - indexbegin];
             for (int index = indexbegin; index < montecarlosim; index++)
             {
-                //SolveStochasticHexaSoil(index, Stoch1[index], Stoch2[index], readMatrixDataPartially(Stoch3, index, index, 0, 7), readMatrixDataPartially(Stoch3, 0, 7, 8, 8));
-                SolveStochasticHexaSoil(index, Stoch1[index], Stoch2[index], Stoch3[index]);
+                SolveStochasticHexaSoil(index, Stoch1[index], Stoch2[index], readMatrixDataPartially(Stoch3, index, index, 0, 7), readMatrixDataPartially(Stoch3, 0, 7, 8, 8));
                 Console.WriteLine(index);
             }
             //for (int i = 0; i < 1; i++)
@@ -371,10 +254,35 @@ namespace ISAAR.MSolve.SamplesConsole
             //      });
             DateTime end = DateTime.Now;
             writeTime(begin, end);
-            writeData(dispstoch, 1, "displacements.txt");
+            writeData(dispstoch, 1,"displacements.txt");
             writeData(dispstoch150, 1, "displacements150.txt");
-            writeData(stresstoch, 1, "stresses.txt");
+            writeData(stresstoch, 1,"stresses.txt");
         }
+        #endregion
+        #region FiberBeamCode
+        //private static void SolveFibers()
+        //{
+        //    VectorExtensions.AssignTotalAffinityCount();
+        //    Model model = new Model();
+        //    model.SubdomainsDictionary.Add(1, new Subdomain() { ID = 1 });
+        //    FiberBeam.MakeFiberBeamModel(model);
+        //    model.ConnectDataStructures();
+
+        //    SolverSkyline solver = new SolverSkyline(model);
+
+        //    ProblemStructural provider = new ProblemStructural(model, solver.SubdomainsDictionary);
+        //    NonLinearAnalyzerNewtonRaphsonNew analyzer = NonLinearAnalyzerNewtonRaphsonNew.NonLinearAnalyzerWithFixedLoadIncrements(solver, solver.SubdomainsDictionary, provider, 20, model.TotalDOFs);
+        //    StaticAnalyzer parentAnalyzer = new StaticAnalyzer(provider, analyzer, solver.SubdomainsDictionary);
+        //    analyzer.dofid = 4;
+        //    parentAnalyzer.BuildMatrices();
+        //    parentAnalyzer.Initialize();
+        //    parentAnalyzer.Solve();
+        //    writeData(analyzer.displacements, 1);
+        //}
+        //static void Main(string[] args)
+        //{
+        //    SolveFibers();
+        //}
         #endregion
     }
 }

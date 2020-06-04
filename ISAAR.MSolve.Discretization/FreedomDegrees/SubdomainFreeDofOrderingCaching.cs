@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using ISAAR.MSolve.Discretization.Interfaces;
 using ISAAR.MSolve.LinearAlgebra.Reordering;
 using ISAAR.MSolve.LinearAlgebra.Vectors;
@@ -70,6 +71,11 @@ namespace ISAAR.MSolve.Discretization.FreedomDegrees
                 pattern.ConnectIndices(subdomainDofIndices, false);
             }
             (int[] permutation, bool oldToNew) = reorderingAlgorithm.FindPermutation(pattern);
+            for (int i = 0; i < permutation.Length; i++)
+            {
+                Console.Write(i.ToString() + " ");
+                Console.WriteLine(permutation[i]);
+            }
             FreeDofs.Reorder(permutation, oldToNew);
         }
 

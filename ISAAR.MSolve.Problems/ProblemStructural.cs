@@ -258,6 +258,7 @@ namespace ISAAR.MSolve.Problems
 
             model.AssignLoads(solver.DistributeNodalLoads);
             model.AssignMassAccelerationHistoryLoads(timeStep);
+            model.AssignTimeDependentNodalLoads(timeStep, solver.DistributeNodalLoads);
 
             var rhsVectors = new Dictionary<int, IVector>();
             foreach (ISubdomain subdomain in model.Subdomains) rhsVectors.Add(subdomain.ID, subdomain.Forces);

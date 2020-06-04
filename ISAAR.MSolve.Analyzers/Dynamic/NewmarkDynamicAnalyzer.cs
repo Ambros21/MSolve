@@ -350,9 +350,10 @@ namespace ISAAR.MSolve.Analyzers.Dynamic
             foreach (ILinearSystem linearSystem in linearSystems.Values)
             {
                 int id = linearSystem.Subdomain.ID;
-                u[id].CopyFrom(v[id]); //TODO: this copy can be avoided by pointing to v[id] and then v[id] = null;
-                v[id].CopyFrom(linearSystem.Solution);
 
+                u[id].CopyFrom(v[id]);
+                v[id].CopyFrom(linearSystem.Solution);
+                
                 IVector vv = v2[id].Add(externalAccelerations[id]);
 
                 // v2 = a0 * (v - u) - a2 * v1 - a3 * vv

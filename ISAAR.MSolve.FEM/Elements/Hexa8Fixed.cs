@@ -77,7 +77,12 @@ namespace ISAAR.MSolve.FEM.Elements
             for (int i = 0; i < iInt3; i++)
                 materialsAtGaussPoints[i] = (IContinuumMaterial3D)material.Clone();
         }
-
+        public Hexa8Fixed(IContinuumMaterial3D[] materials)
+        {
+            materialsAtGaussPoints = new IContinuumMaterial3D[iInt3];
+            for (int i = 0; i < iInt3; i++)
+                materialsAtGaussPoints[i] = materials[i];
+        }
         public Hexa8Fixed(IContinuumMaterial3D material, IElementDofEnumerator dofEnumerator)
             : this(material)
         {
@@ -130,7 +135,8 @@ namespace ISAAR.MSolve.FEM.Elements
 
         public IList<Node> GetNodesForMatrixAssembly(Element element) => element.Nodes;
 
-        private double[] CalcH8Shape(double fXi, double fEta, double fZeta)
+        //It was set as private. Should there be mistakes please check also here the protection level.
+        public double[] CalcH8Shape(double fXi, double fEta, double fZeta)
         {
             const double fSqC125 = 0.5;
             double fXiP = (1.0 + fXi) * fSqC125;
@@ -303,8 +309,8 @@ namespace ISAAR.MSolve.FEM.Elements
 
             return shapeFunctionDerivatives;
         }
-
-        private GaussLegendrePoint3D[] CalculateGaussMatrices(double[,] nodeCoordinates)
+        //It was set as private. Should there be mistakes please check also here the protection level.
+        public GaussLegendrePoint3D[] CalculateGaussMatrices(double[,] nodeCoordinates)
         {
             GaussLegendrePoint1D[] integrationPointsPerAxis =
                 GaussQuadrature.GetGaussLegendrePoints(iInt);

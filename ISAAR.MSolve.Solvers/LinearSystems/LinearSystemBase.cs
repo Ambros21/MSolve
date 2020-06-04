@@ -68,7 +68,7 @@ namespace ISAAR.MSolve.Solvers.LinearSystems
 
         public TVector RhsConcrete { get; set; }
 
-        IVectorView ILinearSystem.Solution { get => SolutionConcrete; }
+        IVector ILinearSystem.Solution { get => SolutionConcrete; }
         public TVector SolutionConcrete { get; set; }
 
         public virtual void Reset()

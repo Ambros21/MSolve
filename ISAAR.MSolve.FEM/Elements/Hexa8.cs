@@ -76,7 +76,12 @@ namespace ISAAR.MSolve.FEM.Elements
 			for (int i = 0; i < iInt3; i++)
 				materialsAtGaussPoints[i] = (IContinuumMaterial3D)material.Clone();
 		}
-
+        public Hexa8(IContinuumMaterial3D[] materials)
+        {
+            materialsAtGaussPoints = new IContinuumMaterial3D[iInt3];
+            for (int i = 0; i < iInt3; i++)
+                materialsAtGaussPoints[i] = materials[i];
+        }
         public Hexa8(IContinuumMaterial3D material, IElementDofEnumerator dofEnumerator)
             : this(material)
         {

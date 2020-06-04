@@ -32,6 +32,7 @@ namespace ISAAR.MSolve.Solvers.Ordering
                     if (!nodalDOFTypesDictionary.ContainsKey(element.Nodes[i].ID))
                         nodalDOFTypesDictionary.Add(element.Nodes[i].ID, new List<IDofType>());
                     nodalDOFTypesDictionary[element.Nodes[i].ID].AddRange(element.ElementType.DofEnumerator.GetDofTypesForDofEnumeration(element)[i]);
+                    //This is weird. It seems to duplicate the element nodes dofs. Why this happens?
                 }
             }
 

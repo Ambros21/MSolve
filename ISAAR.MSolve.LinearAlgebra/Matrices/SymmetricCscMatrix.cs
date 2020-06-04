@@ -405,8 +405,20 @@ namespace ISAAR.MSolve.LinearAlgebra.Matrices
         /// <summary>
         /// See <see cref="IMatrixView.Multiply(IVectorView, bool)"/>.
         /// </summary>
+        //public IVector Multiply(IVectorView vector, bool transposeThis = false)
+        //    => DenseStrategies.Multiply(this, vector, transposeThis);
         public IVector Multiply(IVectorView vector, bool transposeThis = false)
-            => DenseStrategies.Multiply(this, vector, transposeThis);
+        { 
+            IVector result = Vector.CreateFromArray(new double[vector.Length], false);
+            IVector temp1 = Vector.CreateFromArray(new double[vector.Length], false);
+            IVector temp2= Vector.CreateFromArray(new double[vector.Length], false);
+            CscMultiplications.CscTimesVector(this.NumColumns, values, colOffsets, rowIndices, vector,result);
+            CscMultiplications.CscTransTimesVector(this.NumColumns, values, colOffsets, rowIndices, vector, temp1);
+            result.AddIntoThis(temp1);
+            CscMultiplications.CscDiagonalTimesVector(this.NumColumns, values, colOffsets, rowIndices, vector, temp2);
+            result.LinearCombinationIntoThis(1.0, temp2, -1.0);
+            return result;
+        }
 
         /// <summary>
         /// See <see cref="IMatrixView.MultiplyIntoResult(IVectorView, IVector, bool)"/>.

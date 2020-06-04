@@ -63,7 +63,10 @@ namespace ISAAR.MSolve.XFEM.Entities
             AssignConstraints();
             RemoveInactiveNodalLoads();
         }
-
+        public void AssignTimeDependentNodalLoads(int timeStep, NodalLoadsToSubdomainsDistributor distributeNodalLoads)
+        {
+            //The person responsible should enter the correct code.
+        }
         private void AssignConstraints()
         {
             foreach (XNode node in Nodes)

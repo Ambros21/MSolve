@@ -69,8 +69,8 @@ namespace ISAAR.MSolve.LinearAlgebra.Commons
             }
             return array1D;
         }
-
-        internal static double[] Array2DToFullRowMajor(double[,] array2D)
+        //it was set as internal static. should there be a problem in Conversions check this.
+        public static double[] Array2DToFullRowMajor(double[,] array2D)
         {
             int numRows = array2D.GetLength(0);
             int numColumns = array2D.GetLength(1);

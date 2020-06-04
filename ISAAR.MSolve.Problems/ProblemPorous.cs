@@ -10,6 +10,7 @@ using ISAAR.MSolve.Discretization.Providers;
 using ISAAR.MSolve.FEM.Entities;
 using ISAAR.MSolve.FEM.Interfaces;
 using ISAAR.MSolve.FEM.Providers;
+using ISAAR.MSolve.LinearAlgebra.Commons;
 using ISAAR.MSolve.LinearAlgebra.Matrices;
 using ISAAR.MSolve.LinearAlgebra.Matrices.Builders;
 using ISAAR.MSolve.LinearAlgebra.Vectors;
@@ -127,6 +128,7 @@ namespace ISAAR.MSolve.Problems
 
                 var e = (IPorousFiniteElement)element.ElementType;
                 IMatrix q = e.CouplingMatrix(element);
+                var h1=q.CopytoArray2D();
 
                 int iElementMatrixRow = 0;
                 for (int i = 0; i < element.ElementType.DofEnumerator.GetDofTypesForMatrixAssembly(element).Count; i++)
@@ -136,7 +138,13 @@ namespace ISAAR.MSolve.Problems
                     {
                         if (dofTypeRow != PorousMediaDof.Pressure) continue;
 
-                        int dofRow = allDofs[nodeRow, dofTypeRow];
+                        //int dofRow = allDofs[nodeRow, dofTypeRow];
+                        bool isfreerow = allDofs.TryGetValue(nodeRow, dofTypeRow, out int dofRow);
+                        if (!isfreerow)
+                        {
+                            iElementMatrixRow++;
+                            continue;
+                        }
                         int iElementMatrixColumn = 0;
 
                         for (int j = 0; j < element.ElementType.DofEnumerator.GetDofTypesForMatrixAssembly(element).Count; j++)
@@ -145,9 +153,13 @@ namespace ISAAR.MSolve.Problems
                             foreach (IDofType dofTypeColumn in element.ElementType.DofEnumerator.GetDofTypesForMatrixAssembly(element)[j])
                             {
                                 if (dofTypeColumn == PorousMediaDof.Pressure) continue;
-
-                                int dofColumn = allDofs[nodeColumn, dofTypeColumn];
-                                qSubdomain.AddToEntry(dofColumn, dofRow, q[iElementMatrixRow, iElementMatrixColumn]);
+                                bool isfreecolumn=allDofs.TryGetValue(nodeColumn, dofTypeColumn,out int dofColumn);
+                                if (isfreecolumn)
+                                {
+                                    qSubdomain.AddToEntry(dofColumn, dofRow, h1[iElementMatrixRow, iElementMatrixColumn]);
+                                }
+                               //int dofColumn = allDofs[nodeColumn, dofTypeColumn];
+                               //qSubdomain.AddToEntry(dofColumn, dofRow, q[iElementMatrixRow, iElementMatrixColumn]);
                                 iElementMatrixColumn++;
                             }
                         }
@@ -155,7 +167,6 @@ namespace ISAAR.MSolve.Problems
                     }
                 }
             }
-
             return qSubdomain.BuildCsrMatrix(true);
         }
 
@@ -219,6 +230,7 @@ namespace ISAAR.MSolve.Problems
 
             model.AssignLoads(solver.DistributeNodalLoads);
             model.AssignMassAccelerationHistoryLoads(timeStep);
+            model.AssignTimeDependentNodalLoads(timeStep, solver.DistributeNodalLoads);
 
             var rhsVectors = new Dictionary<int, IVector>();
             foreach (Subdomain subdomain in model.Subdomains) rhsVectors.Add(subdomain.ID, subdomain.Forces);
@@ -281,7 +293,7 @@ namespace ISAAR.MSolve.Problems
 
         public IVector DampingMatrixVectorProduct(ISubdomain subdomain, IVectorView vector)
         {
-            IVector result = this.Cs[subdomain.ID].Multiply(vector);
+            IVector result = this.Cs[subdomain.ID].Multiply(vector); //Why this motherfucker shows wrong numbers? 
             result.SubtractIntoThis(qs[subdomain.ID].Multiply(vector));
             return result;
         }

@@ -80,9 +80,9 @@ namespace ISAAR.MSolve.Solvers.LinearSystems
         ISubdomain Subdomain { get; } //TODO: delete this once subdomains have been abstracted.
 
         /// <summary>
-        /// The solution vector.
+        /// The solution vector. //Ambro. This was changed to correct Newmark Method error and to get the INCREMENTAL and not the ITERATIVE displacements for velocity and acceleration calculations.
         /// </summary>
-        IVectorView Solution { get; }
+        IVector Solution { get; }
 
         /// <summary>
         /// Initializes a new vector with zero entries. Its pattern depends on the solver used. The freedom degrees must be 

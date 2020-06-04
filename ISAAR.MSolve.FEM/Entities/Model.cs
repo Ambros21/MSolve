@@ -96,13 +96,16 @@ namespace ISAAR.MSolve.FEM.Entities
 
         public void AssignNodalLoads(NodalLoadsToSubdomainsDistributor distributeNodalLoads)
         {
-            var globalNodalLoads = new Table<INode, IDofType, double>();
-            foreach (Load load in Loads) globalNodalLoads.TryAdd(load.Node, load.DOF, load.Amount);
-
-            Dictionary<int, SparseVector> subdomainNodalLoads = distributeNodalLoads(globalNodalLoads);
-            foreach (var idSubdomainLoads in subdomainNodalLoads)
+            if (Loads.Count != 0)
             {
-                SubdomainsDictionary[idSubdomainLoads.Key].Forces.AddIntoThis(idSubdomainLoads.Value);
+                var globalNodalLoads = new Table<INode, IDofType, double>();
+                foreach (Load load in Loads) globalNodalLoads.TryAdd(load.Node, load.DOF, load.Amount);
+
+                Dictionary<int, SparseVector> subdomainNodalLoads = distributeNodalLoads(globalNodalLoads);
+                foreach (var idSubdomainLoads in subdomainNodalLoads)
+                {
+                    SubdomainsDictionary[idSubdomainLoads.Key].Forces.AddIntoThis(idSubdomainLoads.Value);
+                }
             }
         }
 

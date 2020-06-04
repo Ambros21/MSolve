@@ -106,7 +106,7 @@ namespace ISAAR.MSolve.Analyzers.NonLinear
                 //Vector<double> internalRhs = (Vector<double>)subdomain.GetRhsFromSolution(u[subdomain.ID], du[subdomain.ID]);
 
                 //TODO: remove cast
-                IVector internalRhs = subdomainUpdaters[id].GetRhsFromSolution(uPlusdu[id], du[id]);//TODOMaria this calculates the internal forces
+                IVector internalRhs = subdomainUpdaters[id].GetRhsFromSolution(u[id], du[id]);//TODOMaria this calculates the internal forces
                 provider.ProcessInternalRhs(linearSystem.Subdomain, uPlusdu[id], internalRhs);//TODOMaria this does nothing
                 //(new Vector<double>(u[subdomain.ID] + du[subdomain.ID])).Data);
 
@@ -187,7 +187,6 @@ namespace ISAAR.MSolve.Analyzers.NonLinear
                 u[id].AddIntoThis(du[id]);
             }
         }
-
         protected void SplitResidualForcesToSubdomains()
         {
             foreach (ILinearSystem linearSystem in linearSystems.Values)
@@ -198,7 +197,14 @@ namespace ISAAR.MSolve.Analyzers.NonLinear
                     linearSystem.RhsVector);
             }
         }
-
+        protected void CopySolutionToSubdomains()
+        {
+            foreach (ILinearSystem linearSystem in linearSystems.Values)
+            {
+                int id = linearSystem.Subdomain.ID;
+                linearSystem.Solution.CopyFrom(u[id]);
+            }
+        }
         protected void StoreLogResults(DateTime start, DateTime end)
         {
             foreach (int id in Logs.Keys)

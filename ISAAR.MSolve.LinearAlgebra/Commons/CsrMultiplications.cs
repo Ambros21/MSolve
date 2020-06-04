@@ -215,7 +215,29 @@ namespace ISAAR.MSolve.LinearAlgebra.Commons
                 }
             }
         }
-
+        internal static void CsrDiagonalTimesVector(int numCsrRows, double[] csrValues, int[] csrRowOffsets, int[] csrColIndices,
+     IVectorView lhs, double[] rhs)
+        {
+            for (int i = 0; i < rhs.Length; i++)
+            {
+                int csrrowStart = csrRowOffsets[i];
+                int csrrowEnd = csrRowOffsets[i + 1];
+                for (int k = csrrowStart; k < csrrowEnd; ++k)
+                {
+                    if (csrColIndices[k] == i)
+                    {
+                        rhs[i] = lhs[i] * csrValues[k];
+                    }
+                }
+            }
+        }
+        internal static void CsrDiagonalTimesVector(int numCsrRows, double[] csrValues, int[] csrRowOffsets, int[] csrColIndices,
+   IVectorView lhs, IVector rhs)
+        {
+            var temp = new double[rhs.Length];
+            CsrDiagonalTimesVector(numCsrRows, csrValues, csrRowOffsets, csrColIndices, lhs, temp);
+            rhs.CopyFrom(Vector.CreateFromArray(temp));
+        }
         internal static void MatrixTransTimesCsrTrans(int numCsrRows, double[] csrValues, int[] csrRowOffsets,
             int[] csrColIndices, IMatrixView other, Matrix result)
         {

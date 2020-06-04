@@ -72,6 +72,7 @@ namespace ISAAR.MSolve.Analyzers.NonLinear
                 Debug.WriteLine("NR {0}, first error: {1}, exit error: {2}", iteration, firstError, errorNorm);
                 SaveMaterialStateAndUpdateSolution();
             }
+            CopySolutionToSubdomains();
             //            ClearMaterialStresses();
 
             // TODO: Logging should be done at each iteration. And it should be done using pull observers
