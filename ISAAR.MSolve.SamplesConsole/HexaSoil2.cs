@@ -287,9 +287,9 @@ namespace ISAAR.MSolve.SamplesConsole
             //}
             #endregion
             double nodalLoad = 0.0;
-            double totalDuration = 50.00;
+            double totalDuration = 0.5;
             double timeStepDuration = 0.1;
-            double constantsegmentdurationratio = 0.01;
+            double constantsegmentdurationratio = 1;
             GeneralDynamicNodalLoad loadinitialz;
             foreach (Node nodecheck in model.NodesDictionary.Values)
             {
