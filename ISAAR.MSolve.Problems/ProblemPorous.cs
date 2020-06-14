@@ -81,7 +81,7 @@ namespace ISAAR.MSolve.Problems
             dampingProvider = new ElementPoreDampingProvider(new ElementStructuralDampingProvider(), c.Damping);
             stiffnessProvider = new ElementPoreStiffnessProvider(new ElementStructuralStiffnessProvider(), c.Damping);
             BuildQs();
-            initialConditionProvider = new InitialConditionProvider();
+           // initialConditionProvider = new InitialConditionProvider();
         }
 
         private void BuildKs() => ks = solver.BuildGlobalMatrices(stiffnessProvider);
@@ -103,7 +103,7 @@ namespace ISAAR.MSolve.Problems
             if (mustRebuild) ks = solver.BuildGlobalMatrices(stiffnessProvider);
             foreach (ISubdomain subdomain in model.Subdomains) subdomain.ResetMaterialsModifiedProperty();
         }
-        private void BuildInitial() => InitCond = solver.DistributeNodalLoads(initialConditionProvider);
+       // private void BuildInitial() => InitCond = solver.DistributeNodalLoads(initialConditionProvider);
         private void BuildMs() => ms = solver.BuildGlobalMatrices(massProvider);
 
         private void BuildCs() => cs = solver.BuildGlobalMatrices(dampingProvider);
