@@ -11,6 +11,7 @@ namespace ISAAR.MSolve.Analyzers.NonLinear
 {
     public class LoadControlAnalyzer : NonLinearAnalyzerBase
     {
+        private Dictionary<int, IVector> internalRhsVectors;
         private LoadControlAnalyzer(IStructuralModel model, ISolver solver, INonLinearProvider provider,
             IReadOnlyDictionary<int, INonLinearSubdomainUpdater> subdomainUpdaters,
             int numIncrements, int maxIterationsPerIncrement, int numIterationsForMatrixRebuild, double residualTolerance) : 
@@ -34,12 +35,17 @@ namespace ISAAR.MSolve.Analyzers.NonLinear
                 int iteration = 0;
                 for (iteration = 0; iteration < maxIterationsPerIncrement; iteration++)
                 {
+                    if (iteration==0)
+                    {
+                        internalRhsVectors = CalculateInternalRhsatfirstiteration(increment, iteration);
+                        double residualNormCurrentfirstiter = UpdateResidualForcesAndNormatfirstiteration(increment, internalRhsVectors);
+                    }
                     if (iteration == maxIterationsPerIncrement - 1) return;
                     if (Double.IsNaN(errorNorm)) return;
                     solver.Solve();
                     //double rhsNormIt = solver.LinearSystems.First().Value.RhsVector.Norm2();
                     //double xNormIt = solver.LinearSystems.First().Value.Solution.Norm2();
-                    Dictionary<int, IVector> internalRhsVectors = CalculateInternalRhs(increment, iteration);
+                    internalRhsVectors = CalculateInternalRhs(increment, iteration);
                     double residualNormCurrent = UpdateResidualForcesAndNorm(increment, internalRhsVectors); // This also sets the rhs vectors in linear systems.
                     errorNorm = globalRhsNormInitial != 0 ? residualNormCurrent / globalRhsNormInitial : 0;// (rhsNorm*increment/increments) : 0;//TODOMaria this calculates the internal force vector and subtracts it from the external one (calculates the residual)
                     //Console.WriteLine($"Increment {increment}, iteration {iteration}: norm2(error) = {errorNorm}");

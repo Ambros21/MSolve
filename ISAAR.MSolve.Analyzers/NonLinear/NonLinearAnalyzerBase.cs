@@ -91,8 +91,9 @@ namespace ISAAR.MSolve.Analyzers.NonLinear
                     du[id].Clear();
                     uPlusdu[id].Clear();
                     du[id].AddIntoThis(linearSystem.Solution);
+                    uPlusdu[id].AddIntoThis(u[id]);
                     uPlusdu[id].AddIntoThis(linearSystem.Solution);
-                    du[id].SubtractIntoThis(u[id]);
+                    //du[id].SubtractIntoThis(u[id]);
                 }
                 else
                 {
@@ -121,7 +122,31 @@ namespace ISAAR.MSolve.Analyzers.NonLinear
 
             return internalRhsVectors; 
         }
+        protected Dictionary<int, IVector> CalculateInternalRhsatfirstiteration(int currentIncrement, int iteration)
+        {
+            var internalRhsVectors = new Dictionary<int, IVector>();
+            foreach (ILinearSystem linearSystem in linearSystems.Values)
+            {
+                int id = linearSystem.Subdomain.ID;
 
+                //Vector<double> internalRhs = (Vector<double>)subdomain.GetRhsFromSolution(u[subdomain.ID], du[subdomain.ID]);
+
+                //TODO: remove cast
+                IVector internalRhs = subdomainUpdaters[id].GetRhsFromSolution(u[id], du[id]);//TODOMaria this calculates the internal forces
+                provider.ProcessInternalRhs(linearSystem.Subdomain, uPlusdu[id], internalRhs);//TODOMaria this does nothing
+                //(new Vector<double>(u[subdomain.ID] + du[subdomain.ID])).Data);
+
+                if (parentAnalyzer != null)
+                {
+                    IVector otherRhsComponents = parentAnalyzer.GetOtherRhsComponents(linearSystem, uPlusdu[id]);
+                    internalRhs.AddIntoThis(otherRhsComponents);//TODOMaria this does nothing for the static problem
+                }
+
+                internalRhsVectors.Add(id, internalRhs);
+            }
+
+            return internalRhsVectors;
+        }
         protected double UpdateResidualForcesAndNorm(int currentIncrement, Dictionary<int, IVector> internalRhs)
         {
             globalRhs.Clear();
@@ -142,7 +167,26 @@ namespace ISAAR.MSolve.Analyzers.NonLinear
             }
             return provider.CalculateRhsNorm(globalRhs);
         }
+        protected double UpdateResidualForcesAndNormatfirstiteration(int currentIncrement, Dictionary<int, IVector> internalRhs)
+        {
+            globalRhs.Clear();
+            foreach (ILinearSystem linearSystem in linearSystems.Values)
+            {
+                int id = linearSystem.Subdomain.ID;
 
+                linearSystem.RhsVector.Clear(); //TODO: we can copy rhs[subdomain.ID] and then scale it instead of clearing and adding.
+
+                // External forces = loadFactor * total external forces
+                //TODO: the next line adds a vector to itself many times. This is called multiplication and is much faster.
+                for (int j = 0; j <= currentIncrement; j++) linearSystem.RhsVector.AddIntoThis(rhs[id]);//TODOMaria this adds the external forces 
+
+                // Residual forces = external - internal
+                linearSystem.RhsVector.SubtractIntoThis(internalRhs[id]);
+
+                model.GlobalDofOrdering.AddVectorSubdomainToGlobal(linearSystem.Subdomain, linearSystem.RhsVector, globalRhs);
+            }
+            return provider.CalculateRhsNorm(globalRhs);
+        }
         protected void ClearIncrementalSolutionVector()
         {
             foreach (ILinearSystem linearSystem in linearSystems.Values) du[linearSystem.Subdomain.ID].Clear();
@@ -233,6 +277,7 @@ namespace ISAAR.MSolve.Analyzers.NonLinear
             foreach (ILinearSystem linearSystem in linearSystems.Values)
             {
                 linearSystem.RhsVector.CopyFrom(rhs[linearSystem.Subdomain.ID]);
+                
                 //linearSystem.RhsVector.Multiply(step + 1);
             }
         }
