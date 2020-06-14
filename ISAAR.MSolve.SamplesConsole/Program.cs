@@ -318,13 +318,13 @@ namespace ISAAR.MSolve.SamplesConsole
             childAnalyzerBuilder.MaxIterationsPerIncrement = 100;
             childAnalyzerBuilder.NumIterationsForMatrixRebuild = 1;
             LoadControlAnalyzer childAnalyzer = childAnalyzerBuilder.Build();
-            var parentAnalyzerBuilder = new NewmarkDynamicAnalyzer.Builder(model, solver, provider, childAnalyzer, 0.01, 20);
+            var parentAnalyzerBuilder = new NewmarkDynamicAnalyzer.Builder(model, solver, provider, childAnalyzer, 0.1, 0.5);
             NewmarkDynamicAnalyzer parentAnalyzer = parentAnalyzerBuilder.Build();
 
             parentAnalyzer.Initialize();
             parentAnalyzer.Solve();
             int monitorDof = HexaSoil2.ProvideIdMonitor(model);
-
+            
             //dispstoch[samplenumber] = analyzer.displacements[analyzer.failinc-1];
             //dispstoch150[samplenumber] = analyzer.displacements[149];
             //stresstoch[samplenumber] = analyzer.failinc;

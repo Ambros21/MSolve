@@ -144,7 +144,7 @@ namespace ISAAR.MSolve.SamplesConsole
                     //}
                     for (int i = 0; i < gpNo; i++)
                     {
-                        elementType2.Permeability[i] = Stoch3*3600*24/10; //Hydraulic Conductivity in days
+                        elementType2.Permeability[i] = Stoch3;
                     }
                     e1 = new Element()
                     {
@@ -287,9 +287,9 @@ namespace ISAAR.MSolve.SamplesConsole
             //}
             #endregion
             double nodalLoad = 0.0;
-            double totalDuration = 20;
-            double timeStepDuration = 0.01;
-            double constantsegmentdurationratio = 0.025;
+            double totalDuration = 0.5;
+            double timeStepDuration = 0.1;
+            double constantsegmentdurationratio = 1;
             GeneralDynamicNodalLoad loadinitialz;
             foreach (Node nodecheck in model.NodesDictionary.Values)
             {
