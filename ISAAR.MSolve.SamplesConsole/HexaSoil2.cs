@@ -63,6 +63,19 @@ namespace ISAAR.MSolve.SamplesConsole
                     nodeID++;
                 }
             }
+            int nodeId = 1;
+            for (int l = 0; l < kmax; l++)
+            {
+                for (int k = 0; k < jmax; k++)
+                {
+                    for (int j = 0; j < imax; j++)
+                    {
+                        double p = 10*(hz - model.NodesDictionary[nodeId].Z); //Initial pore pressure assumed linear and hudrostatic.
+                        model.NodesDictionary[nodeId].InitialConditions.Add(new InitialCondition { Amount = p, DOF = PorousMediaDof.Pressure });
+                        nodeId++;
+                    }
+                }
+            }
             ElasticMaterial3D material1 = new ElasticMaterial3D()
             {
                 YoungModulus = 2.1e5,
@@ -144,7 +157,7 @@ namespace ISAAR.MSolve.SamplesConsole
                     //}
                     for (int i = 0; i < gpNo; i++)
                     {
-                        elementType2.Permeability[i] = Stoch3;
+                        elementType2.Permeability[i] = Stoch3*360*24;
                     }
                     e1 = new Element()
                     {
@@ -287,9 +300,9 @@ namespace ISAAR.MSolve.SamplesConsole
             //}
             #endregion
             double nodalLoad = 0.0;
-            double totalDuration = 0.5;
-            double timeStepDuration = 0.1;
-            double constantsegmentdurationratio = 1;
+            double totalDuration = 20;
+            double timeStepDuration = 0.01;
+            double constantsegmentdurationratio = 0.025;
             GeneralDynamicNodalLoad loadinitialz;
             foreach (Node nodecheck in model.NodesDictionary.Values)
             {

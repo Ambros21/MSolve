@@ -24,6 +24,7 @@ namespace ISAAR.MSolve.Problems
         private bool providersInitialized = false;
         private double scalingCoefficient;
         private Dictionary<int, IMatrix> ms, cs, ks;
+        private Dictionary<int, IVector> InitCond;
         private Dictionary<int, CsrMatrix> qs;
         private readonly Model model;
         private readonly ISolver solver;
@@ -31,7 +32,7 @@ namespace ISAAR.MSolve.Problems
         private ElementPoreStiffnessProvider stiffnessProvider;
         private ElementPoreDampingProvider dampingProvider;
         private ElementPoreMassProvider massProvider;
-
+        private InitialConditionProvider initialConditionProvider;
         public ProblemPorous(Model model, ISolver solver)
         {
             this.model = model;
@@ -80,6 +81,7 @@ namespace ISAAR.MSolve.Problems
             dampingProvider = new ElementPoreDampingProvider(new ElementStructuralDampingProvider(), c.Damping);
             stiffnessProvider = new ElementPoreStiffnessProvider(new ElementStructuralStiffnessProvider(), c.Damping);
             BuildQs();
+            initialConditionProvider = new InitialConditionProvider();
         }
 
         private void BuildKs() => ks = solver.BuildGlobalMatrices(stiffnessProvider);
@@ -101,7 +103,7 @@ namespace ISAAR.MSolve.Problems
             if (mustRebuild) ks = solver.BuildGlobalMatrices(stiffnessProvider);
             foreach (ISubdomain subdomain in model.Subdomains) subdomain.ResetMaterialsModifiedProperty();
         }
-
+        private void BuildInitial() => InitCond = solver.DistributeNodalLoads(initialConditionProvider);
         private void BuildMs() => ms = solver.BuildGlobalMatrices(massProvider);
 
         private void BuildCs() => cs = solver.BuildGlobalMatrices(dampingProvider);
