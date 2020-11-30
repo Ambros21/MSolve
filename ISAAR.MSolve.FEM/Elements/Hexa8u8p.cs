@@ -138,8 +138,8 @@ namespace ISAAR.MSolve.FEM.Elements
         public double PoreA { get; set; } = 1;
         public double Xw { get; set; } = 1;
         public double Cs { get; set; } = 0;
-        public double RayleighAlpha { get; set; }
-        public double RayleighBeta { get; set; }
+        public double RayleighAlpha { get; set; } = 1.178;
+        public double RayleighBeta { get; set; } = 0.00159;
 
         public double SolidBulkModulus => (materialsAtGaussPoints[0].YoungModulus + materialsAtGaussPoints[1].YoungModulus) / (6 - 12 * materialsAtGaussPoints[0].PoissonRatio);
 

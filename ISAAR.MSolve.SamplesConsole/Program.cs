@@ -318,7 +318,7 @@ namespace ISAAR.MSolve.SamplesConsole
             childAnalyzerBuilder.MaxIterationsPerIncrement = 100;
             childAnalyzerBuilder.NumIterationsForMatrixRebuild = 1;
             LoadControlAnalyzer childAnalyzer = childAnalyzerBuilder.Build();
-            var parentAnalyzerBuilder = new NewmarkDynamicAnalyzer.Builder(model, solver, provider, childAnalyzer, 0.01, 20);
+            var parentAnalyzerBuilder = new NewmarkDynamicAnalyzer.Builder(model, solver, provider, childAnalyzer, 0.001, 10);
             NewmarkDynamicAnalyzer parentAnalyzer = parentAnalyzerBuilder.Build();
 
             parentAnalyzer.Initialize();

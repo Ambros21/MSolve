@@ -157,7 +157,7 @@ namespace ISAAR.MSolve.SamplesConsole
                     //}
                     for (int i = 0; i < gpNo; i++)
                     {
-                        elementType2.Permeability[i] = Stoch3*360*24;
+                        elementType2.Permeability[i] = Stoch3*360*24*365;
                     }
                     e1 = new Element()
                     {
@@ -300,9 +300,9 @@ namespace ISAAR.MSolve.SamplesConsole
             //}
             #endregion
             double nodalLoad = 0.0;
-            double totalDuration = 20;
-            double timeStepDuration = 0.01;
-            double constantsegmentdurationratio = 0.025;
+            double totalDuration = 10;
+            double timeStepDuration = 0.001;
+            double constantsegmentdurationratio = 0;
             GeneralDynamicNodalLoad loadinitialz;
             foreach (Node nodecheck in model.NodesDictionary.Values)
             {
