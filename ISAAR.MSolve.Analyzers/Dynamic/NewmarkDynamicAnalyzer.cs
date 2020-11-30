@@ -305,7 +305,7 @@ namespace ISAAR.MSolve.Analyzers.Dynamic
                 uc.Add(id, linearSystem.CreateZeroVector());
                 ucc.Add(id, linearSystem.CreateZeroVector());
                 u.Add(id, linearSystem.CreateZeroVector());
-                //v.Add(id, linearSystem.CreateZeroVector());
+                v.Add(id, linearSystem.CreateZeroVector());
                 v1.Add(id, linearSystem.CreateZeroVector());
                 v2.Add(id, linearSystem.CreateZeroVector());
                 rhs.Add(id, linearSystem.CreateZeroVector());
@@ -313,7 +313,7 @@ namespace ISAAR.MSolve.Analyzers.Dynamic
                 // Account for initial conditions coming from a previous solution. 
                 //TODO: This doesn't work as intended. The solver (previously the LinearSystem) initializes the solution to zero.
 
-                v[id] = linearSystem.InitialSolution.Copy();
+                
             }
         }
 

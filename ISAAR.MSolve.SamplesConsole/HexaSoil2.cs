@@ -133,7 +133,7 @@ namespace ISAAR.MSolve.SamplesConsole
                         initialStresses[3] = 0;
                         initialStresses[4] = 0;
                         initialStresses[5] = 0;
-                        gaussPointMaterials[i] = new KavvadasClays(Stoch1, Stoch2, 1, ksi, initialStresses,Htot);
+                        gaussPointMaterials[i] = new KavvadasClays(Stoch1, Stoch2, 0, ksi, initialStresses,Htot);
                     }
                     //elementType1 = new Hexa8(gaussPointMaterials);
                     elementType2 = new Hexa8u8p(gaussPointMaterials);
@@ -157,7 +157,7 @@ namespace ISAAR.MSolve.SamplesConsole
                     //}
                     for (int i = 0; i < gpNo; i++)
                     {
-                        elementType2.Permeability[i] = Stoch3*360*24;
+                        elementType2.Permeability[i] = 10^-8*3600*24;
                     }
                     e1 = new Element()
                     {
@@ -300,9 +300,9 @@ namespace ISAAR.MSolve.SamplesConsole
             //}
             #endregion
             double nodalLoad = 0.0;
-            double totalDuration = 20;
+            double totalDuration = 120;
             double timeStepDuration = 0.01;
-            double constantsegmentdurationratio = 0.025;
+            double constantsegmentdurationratio = 0/120;
             GeneralDynamicNodalLoad loadinitialz;
             foreach (Node nodecheck in model.NodesDictionary.Values)
             {

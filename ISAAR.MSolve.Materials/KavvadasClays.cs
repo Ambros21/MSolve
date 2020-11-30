@@ -145,8 +145,8 @@ namespace ISAAR.MSolve.PreProcessor.Materials
             }
             else
             {
-                Kmax = 0.1*0.008686;
-                Kmin = 0.1*0.008686;
+                Kmax = 0.5*0.008686;
+                Kmin = 0.5*0.008686;
             }
             PAR[3]= (Kmin - Kmax) * Zeta / this.Htot + Kmax;
             PAR[2] = 10 * PAR[3];

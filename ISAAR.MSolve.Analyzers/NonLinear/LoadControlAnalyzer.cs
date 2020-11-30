@@ -56,7 +56,7 @@ namespace ISAAR.MSolve.Analyzers.NonLinear
 
                     if (errorNorm < residualTolerance)
                     {
-                        var str = errorNorm.ToString() + " " + internalRhsVectors[1][0].ToString();
+                        var str = u[1][722].ToString();
                         Console.WriteLine(str);
                         foreach (var subdomainLogPair in IncrementalLogs)
                         {
