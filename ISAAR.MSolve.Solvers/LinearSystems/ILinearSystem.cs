@@ -85,11 +85,7 @@ namespace ISAAR.MSolve.Solvers.LinearSystems
         IVector Solution { get; }
 
 
-        /// <summary>
-        /// The initial solution vector. //Ambro. This is introduced to enter initial conditions
-        /// </summary>
-        IVector InitialSolution { get; }
-
+        
         /// <summary>
         /// Initializes a new vector with zero entries. Its pattern depends on the solver used. The freedom degrees must be 
         /// ordered before this method can be called. Special attention is needed if the freedom degrees change during 

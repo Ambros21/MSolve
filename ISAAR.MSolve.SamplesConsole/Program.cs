@@ -372,7 +372,7 @@ namespace ISAAR.MSolve.SamplesConsole
                 for (int lambdaint = 0; lambdaint < (int)(1000 / 150); lambdaint++)
                 {
                     hasfailed = false;
-                    SolveStochasticHexaSoil(index, Stoch1[index], Stoch2[index], readMatrixDataPartially(Stoch3, index, index, 0, 7), readMatrixDataPartially(Stoch3, 0, 7, 8, 8),(lambdaint+1)*0.01+1);
+                    SolveStochasticHexaSoil(index, Stoch1[index], Stoch2[index], readMatrixDataPartially(Stoch3, index, index, 0, 7), readMatrixDataPartially(Stoch3, 0, 7, 8, 8),(lambdaint+1)*0.01+2.84);
                     if (hasfailed == true) break;
                 }
                 //SolveStochasticHexaSoil(index, Stoch1[index], Stoch2[index], Stoch3[index]);
