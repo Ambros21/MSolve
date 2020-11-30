@@ -6,6 +6,7 @@ using System.Linq;
 using ISAAR.MSolve.Discretization.Commons;
 using ISAAR.MSolve.Discretization.FreedomDegrees;
 using ISAAR.MSolve.Discretization.Interfaces;
+using ISAAR.MSolve.FEM.Elements;
 using ISAAR.MSolve.LinearAlgebra.Vectors;
 
 //TODO: remove code that calculates rhs vector components (nodal loads, constraints, etc). It should be moved to dedicated 
@@ -15,6 +16,7 @@ namespace ISAAR.MSolve.FEM.Entities
 {
     public class Subdomain : ISubdomain
     {
+        public bool hasfailed { get; set; }
         private readonly List<Node> nodes = new List<Node>();
 
         public Subdomain(int id)
@@ -151,6 +153,13 @@ namespace ISAAR.MSolve.FEM.Entities
         public void SaveMaterialState()
         {
             foreach (Element element in Elements) element.ElementType.SaveMaterialState();
+            foreach (Element m in Elements)
+            {
+                if (m.ElementType.hasfailed == true)
+                {
+                    this.hasfailed = true;
+                }
+            }
         }
 
         //TODO: I am against modifying the constraints table of the subdomain. Instead the analyzer should keep a constraint

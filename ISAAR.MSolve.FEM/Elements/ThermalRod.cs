@@ -20,6 +20,7 @@ namespace ISAAR.MSolve.FEM.Elements
     /// </summary>
     public class ThermalRod : IFiniteElement, IEmbeddedElement
     {
+        public bool hasfailed { get; set; }
         private const int numNodes = 2;
         private const int numDofs = 2;
         private static readonly IDofType[][] dofTypes = {

@@ -17,6 +17,7 @@ namespace ISAAR.MSolve.FEM.Elements
 {
     public class Quad4 : IStructuralFiniteElement, IEmbeddedHostElement
     {
+        public bool hasfailed { get; set; }
         protected static double determinantTolerance = 0.00000001;
 
         protected static int iInt = 2;

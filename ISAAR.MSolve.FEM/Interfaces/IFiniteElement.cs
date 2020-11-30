@@ -7,6 +7,7 @@ namespace ISAAR.MSolve.FEM.Interfaces
 {
     public interface IFiniteElement : IElementType
     {
+        bool hasfailed { get; set; }
         int ID { get; }
         ElementDimensions ElementDimensions { get; }
         bool MaterialModified { get; }

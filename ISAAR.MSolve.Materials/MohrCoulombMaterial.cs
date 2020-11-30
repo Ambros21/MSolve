@@ -106,6 +106,8 @@ namespace ISAAR.MSolve.Materials
         public double Friction { get { return friction; } }
         public double Dilation { get { return dilation; } }
 
+        public bool hasfailed { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
         public object Clone()
         {
             var constitutiveMatrixCopy = new double[6, 6];

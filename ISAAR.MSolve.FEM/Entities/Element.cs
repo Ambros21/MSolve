@@ -17,8 +17,9 @@ namespace ISAAR.MSolve.FEM.Entities
         Shear = 2
     }
 
-    public class Element: IElement
+    public class Element : IElement
 	{
+        public bool hasfailed { get; set; }
         private readonly Dictionary<int, Node> nodesDictionary = new Dictionary<int, Node>();
         private readonly Dictionary<IDofType, AbsorptionType> absorptions = new Dictionary<IDofType, AbsorptionType>();
         private readonly IList<Node> embeddedNodes = new List<Node>();

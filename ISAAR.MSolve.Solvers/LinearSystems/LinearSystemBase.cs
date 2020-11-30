@@ -71,7 +71,6 @@ namespace ISAAR.MSolve.Solvers.LinearSystems
         IVector ILinearSystem.Solution { get => SolutionConcrete; }
         public TVector SolutionConcrete { get; set; }
 
-        //public IVector InitialSolution => throw new NotImplementedException();
 
         public virtual void Reset()
         {

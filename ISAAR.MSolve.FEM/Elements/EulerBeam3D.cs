@@ -15,6 +15,7 @@ namespace ISAAR.MSolve.FEM.Elements
 {
     public class EulerBeam3D : IStructuralFiniteElement, IEmbeddedElement
     {
+        public bool hasfailed { get; set; }
         private static readonly IDofType[] nodalDOFTypes = new IDofType[6] { StructuralDof.TranslationX, StructuralDof.TranslationY, StructuralDof.TranslationZ, StructuralDof.RotationX, StructuralDof.RotationY, StructuralDof.RotationZ };
         private static readonly IDofType[][] dofs = new IDofType[][] { nodalDOFTypes, nodalDOFTypes };
         private readonly double youngModulus;
