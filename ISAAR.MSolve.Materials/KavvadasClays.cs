@@ -17,6 +17,7 @@ namespace ISAAR.MSolve.PreProcessor.Materials
         public double Zeta { get; set; }
         public double Kmax;
         public double Kmin;
+        public bool hasfailed { get; set; }
         public IMatrixView ConstitutiveMatrix { get { return ConstMatr; } set { } }
         private Matrix ConstMatr = Matrix.CreateFromArray(new double[6, 6]);
         private Matrix ElConstMatr = Matrix.CreateFromArray(new double[6, 6]);
@@ -38,12 +39,13 @@ namespace ISAAR.MSolve.PreProcessor.Materials
         public IMatrixView elasticConstitutiveMatrix { get { return ElConstMatr; } set { } } //the readonly was erased due to the change of the elasticconstitutivematric regarding time
         private double[] incrementalStrains = new double[6];
         private double[] plasticStrain;
-        private double[] plasticStrainNew;
+        private double[] TotalStrain;
         private double[] stressesNew = new double[6];
         private double Htot;
         private bool modified;
         public void UpdateMaterial(double[] strainsIncrement)
         {
+            incrementalStrains = new double[6];
             for (int j1 = 0; j1 < 6; j1++)
             {
                incrementalStrains[j1]=strainsIncrement[j1];
@@ -64,7 +66,6 @@ namespace ISAAR.MSolve.PreProcessor.Materials
             Array.Clear(QH, 0, QH.Length);
             //Array.Clear(stressesNew, 0, stressesNew.Length);
             Array.Clear(plasticStrain,0,5);
-            Array.Clear(plasticStrainNew,0,5);
         }
         public void SaveState()
         {
@@ -75,6 +76,40 @@ namespace ISAAR.MSolve.PreProcessor.Materials
             for (int i = 0; i < 6; i++)
                 this.tempStresses[i] = this.Stresses[i];
             this.ConstitutiveMatrix = ConstitutiveMatrix;
+            for (int j1 = 0; j1 < 6; j1++)
+            {
+                TotalStrain[j1] += incrementalStrains[j1];
+            }
+            if (this.QH[19]+this.QH[20]<0)
+            {
+                Console.WriteLine("Coordinate X:");
+                Console.WriteLine(Coordinates[0]);
+                Console.WriteLine("Coordinate Y:");
+                Console.WriteLine(Coordinates[1]);
+                Console.WriteLine("Coordinate Z:");
+                Console.WriteLine(Coordinates[2]);
+                Console.WriteLine("Stress Vector:");
+                Console.WriteLine(this.Stresses[0]);
+                Console.WriteLine(this.Stresses[1]);
+                Console.WriteLine(this.Stresses[2]);
+                Console.WriteLine(this.Stresses[3]);
+                Console.WriteLine(this.Stresses[4]);
+                Console.WriteLine(this.Stresses[5]);
+                Console.WriteLine("Strains Vector:");
+                Console.WriteLine(this.TotalStrain[0]);
+                Console.WriteLine(this.TotalStrain[1]);
+                Console.WriteLine(this.TotalStrain[2]);
+                Console.WriteLine(this.TotalStrain[3]);
+                Console.WriteLine(this.TotalStrain[4]);
+                Console.WriteLine(this.TotalStrain[5]);
+                Console.WriteLine("Plastic volumetric Strain:");
+                Console.WriteLine(this.QH[4]);
+                Console.WriteLine("Plastic deviatoric Strain:");
+                Console.WriteLine(this.QH[5]);
+                Console.WriteLine("Plastic Hardening Modulus:");
+                Console.WriteLine(this.QH[19] + this.QH[20]);
+                this.hasfailed = true;
+            }      
         }
 
         public void ResetModified()
@@ -91,7 +126,6 @@ namespace ISAAR.MSolve.PreProcessor.Materials
             Array.Clear(QH, 0, QH.Length);
             //Array.Clear(stressesNew, 0, stressesNew.Length);
             Array.Clear(plasticStrain, 0, 5);
-            Array.Clear(plasticStrainNew, 0, 5);
         }
         public void ClearStresses()
         {
@@ -107,7 +141,7 @@ namespace ISAAR.MSolve.PreProcessor.Materials
             Stresses.CopyTo(stressesCopy, 0);
             this.ConstitutiveMatrix = ConstitutiveMatrix;
             //watch out if you use clone.
-            KavvadasClays m = new KavvadasClays(this.YoungModulus, this.PoissonRatio, this.shearModulus, this.ksi, this.initialStresses,this.Htot)
+            KavvadasClays m = new KavvadasClays(this.YoungModulus, this.PoissonRatio, this.shearModulus, this.ksi, this.initialStresses,this.Htot,this.Coordinates)
             {
                 modified = this.Modified,
                 plasticStrain = this.plasticStrain
@@ -123,10 +157,11 @@ namespace ISAAR.MSolve.PreProcessor.Materials
         public KavvadasClays(double youngModulus, double poissonRatio, double alpha, double ksi)
         {
         }
-        public KavvadasClays(double youngModulus, double poissonRatio, double alpha, double ksi, double[] initialStresses,double Htot) : this(youngModulus, poissonRatio, alpha, ksi)
+        public KavvadasClays(double youngModulus, double poissonRatio, double alpha, double ksi, double[] initialStresses,double Htot,double[] nodecoordinates) : this(youngModulus, poissonRatio, alpha, ksi)
         {
+                this.Coordinates = nodecoordinates;
                 plasticStrain = new double[6];
-                plasticStrainNew = new double[6];
+                TotalStrain = new double[6];
                 // if alpha=1 this is a stochastic use and we imply youngModulus and poissonRatio for giving the stochastic values.
                 var gamma = 10; //effective stress
                 this.Htot = Htot;
@@ -140,13 +175,13 @@ namespace ISAAR.MSolve.PreProcessor.Materials
                     Stresses[i] = initialStresses[i];
             if (alpha == 1)
             {
-                Kmax = youngModulus;
-                Kmin = youngModulus;
+                Kmax = youngModulus*0.008686;
+                Kmin = youngModulus*0.008686;
             }
             else
             {
-                Kmax = 0.1*0.008686;
-                Kmin = 0.1*0.008686;
+                Kmax = 0.5*0.008686;
+                Kmin = 0.5*0.008686;
             }
             PAR[3]= (Kmin - Kmax) * Zeta / this.Htot + Kmax;
             PAR[2] = 10 * PAR[3];

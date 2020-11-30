@@ -71,6 +71,7 @@ namespace ISAAR.MSolve.Solvers.LinearSystems
         IVector ILinearSystem.Solution { get => SolutionConcrete; }
         public TVector SolutionConcrete { get; set; }
 
+
         public virtual void Reset()
         {
             foreach (var observer in MatrixObservers) observer.HandleMatrixWillBeSet();

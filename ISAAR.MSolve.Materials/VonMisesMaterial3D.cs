@@ -277,6 +277,7 @@ namespace ISAAR.MSolve.Materials
             get => this.youngModulus;
             set => this.youngModulus = value;
         }
+        public bool hasfailed { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         /// <summary>
         ///   Creates a new object that is a copy of the current instance.

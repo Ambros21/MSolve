@@ -35,6 +35,8 @@ namespace ISAAR.MSolve.XFEM.Entities
         IReadOnlyList<INode> ISubdomain.Nodes => nodes;
         public IReadOnlyList<XNode> Nodes => nodes;
 
+        public bool hasfailed { get; set; }
+
         public double[] CalculateElementIncrementalConstraintDisplacements(IElement element, double constraintScalingFactor)
         {
             var elementNodalDisplacements = new double[FreeDofOrdering.CountElementDofs(element)];

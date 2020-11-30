@@ -37,7 +37,9 @@ namespace ISAAR.MSolve.SamplesConsole
         public static int imax = (int)Math.Truncate(hx / LengthX) + 1;
         public static int jmax = (int)Math.Truncate(hy / LengthY) + 1;
         public static int kmax = (int)Math.Truncate(hz / LengthZ) + 1;
-        public static void MakeHexaSoil(Model model, double Stoch1, double Stoch2, double Stoch3)
+        public static double qfail=0.0;
+        public static double ufail = 0.0;
+        public static void MakeHexaSoil(Model model, double Stoch1, double Stoch2, double[] Stoch3,double[] omega,double lambda)
         {
             // xreiazetai na rythmizei kaneis ta megethi me auto to configuration
             int nodeID = 1;
@@ -108,43 +110,52 @@ namespace ISAAR.MSolve.SamplesConsole
                     for (int i = 0; i < gpNo; i++)
                     {
                         var ActualZeta = 0.0;
+                        var ActualXi = 0.0;
+                        var ActualPsi = 0.0;
+                        double[] Coord = new double[3];
                         var help = elementType1.CalcH8Shape(gaussPoints[i].Xi, gaussPoints[i].Eta, gaussPoints[i].Zeta);
                         for (int j = 0; j < gpNo; j++)
                         {
+                            ActualXi += help[j] * nodeCoordinates[j, 0];
+                            ActualPsi += help[j] * nodeCoordinates[j, 1];
                             ActualZeta += help[j] * nodeCoordinates[j, 2];
                         }
                         gaussPointMaterials[i].Zeta = ActualZeta;
+                        Coord[0] = ActualXi;
+                        Coord[1] = ActualPsi;
+                        Coord[2] = ActualZeta;
                         initialStresses[2] = -gamma * (Htot - gaussPointMaterials[i].Zeta);
                         initialStresses[0] = 0.85 * initialStresses[2];
                         initialStresses[1] = 0.85 * initialStresses[2];
                         initialStresses[3] = 0;
                         initialStresses[4] = 0;
                         initialStresses[5] = 0;
-                        gaussPointMaterials[i] = new KavvadasClays(Stoch1, Stoch2, 1, ksi, initialStresses,Htot);
+                        gaussPointMaterials[i] = new KavvadasClays(Stoch1, Stoch2, 0, ksi, initialStresses,Htot,Coord);
                     }
                     //elementType1 = new Hexa8(gaussPointMaterials);
                     elementType2 = new Hexa8u8p(gaussPointMaterials);
-                    //for (int i = 0; i < gpNo; i++)
-                    //{
-                    //    var ActualZeta = 0.0;
-                    //    var help = elementType1.CalcH8Shape(gaussPoints[i].Xi, gaussPoints[i].Eta, gaussPoints[i].Zeta);
-                    //    for (int j = 0; j < gpNo; j++)
-                    //    {
-                    //        ActualZeta += help[j] * nodeCoordinates[j, 2];
-                    //    }
-                    //    for (int j = 0; j < 8; j = j + 2)
-                    //    {
-                    //        elementType2.Permeability[i] += Stoch3[j] * Math.Cos(omega[j] * ActualZeta);
-                    //    }
-                    //    for (int j = 1; j < 8; j = j + 2)
-                    //    {
-                    //        elementType2.Permeability[i] += Stoch3[j] * Math.Sin(omega[j] * ActualZeta);
-                    //    }
-                    //    elementType2.Permeability[i] = Math.Abs((elementType2.Permeability[i]) * 0.25 * Math.Pow(10, -8) + Math.Pow(10, -8)) / 1;
-                    //}
                     for (int i = 0; i < gpNo; i++)
                     {
-                        elementType2.Permeability[i] = Stoch3*3600*24/10; //Hydraulic Conductivity in days
+                        var ActualZeta = 0.0;
+                        var help = elementType1.CalcH8Shape(gaussPoints[i].Xi, gaussPoints[i].Eta, gaussPoints[i].Zeta);
+                        for (int j = 0; j < gpNo; j++)
+                        {
+                            ActualZeta += help[j] * nodeCoordinates[j, 2];
+                        }
+                        for (int j = 0; j < 8; j = j + 2)
+                        {
+                            elementType2.Permeability[i] += Stoch3[j] * Math.Cos(omega[j] * ActualZeta);
+                        }
+                        for (int j = 1; j < 8; j = j + 2)
+                        {
+                            elementType2.Permeability[i] += Stoch3[j] * Math.Sin(omega[j] * ActualZeta);
+                        }
+                        elementType2.Permeability[i] = Math.Abs((elementType2.Permeability[i]) * 0.25 * Math.Pow(10, -8) + Math.Pow(10, -8)) / 1;
+                    }
+                    for (int i = 0; i < gpNo; i++)
+                    {
+                        // elementType2.Permeability[i] = elementType2.Permeability[i];
+                        elementType2.Permeability[i] = 10^-8*3600*24;
                     }
                     e1 = new Element()
                     {
@@ -287,18 +298,18 @@ namespace ISAAR.MSolve.SamplesConsole
             //}
             #endregion
             double nodalLoad = 0.0;
-            double totalDuration = 20;
-            double timeStepDuration = 0.01;
-            double constantsegmentdurationratio = 0.025;
+            double totalDuration = 1;
+            double timeStepDuration = 0.001;
+            double constantsegmentdurationratio = 1;
             GeneralDynamicNodalLoad loadinitialz;
             foreach (Node nodecheck in model.NodesDictionary.Values)
             {
                 nodalLoad = 0.0;
                 foreach (Element elementcheck in model.ElementsDictionary.Values)
                 {
-                    var Pa = -3750.0;
-                    var P2a = -7500.0 / 2;
-                    var P4a = -15000.0 / 4;
+                    var Pa = lambda*-3750.0;
+                    var P2a = lambda*-7500.0 / 2;
+                    var P4a = lambda *-15000.0 / 4;
                     var bool1 = elementcheck.NodesDictionary.ContainsValue(nodecheck);
                     var bool2 = nodecheck.Z == hz;
                     var bool3 = (nodecheck.X == 0 || nodecheck.X == hx) && (nodecheck.Y == 0 || nodecheck.Y == hy);

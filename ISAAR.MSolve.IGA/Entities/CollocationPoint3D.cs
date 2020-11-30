@@ -43,6 +43,8 @@ namespace ISAAR.MSolve.IGA.Entities
         public List<Constraint> Constraints { get; }
         public Dictionary<int, ISubdomain> SubdomainsDictionary { get; }
 
+        public List<InitialCondition> InitialConditions => throw new NotImplementedException();
+
         public int CompareTo(INode other) => this.ID - other.ID;
     }
 

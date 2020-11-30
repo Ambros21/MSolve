@@ -15,6 +15,7 @@ namespace ISAAR.MSolve.FEM.Elements
 {
     public abstract class Beam2DCorotationalAbstract : IFiniteElement
     {
+        public bool hasfailed { get; set; }
         protected static readonly int NATURAL_DEFORMATION_COUNT = 3;
         protected static readonly int FREEDOM_DEGREE_COUNT = 6;
         protected static readonly int AXIS_COUNT = 1;

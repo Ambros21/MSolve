@@ -56,6 +56,8 @@ namespace ISAAR.MSolve.Analyzers.NonLinear
 
                     if (errorNorm < residualTolerance)
                     {
+                        var str = uPlusdu[1][722].ToString();
+                        Console.WriteLine(str);
                         foreach (var subdomainLogPair in IncrementalLogs)
                         {
                             int subdomainID = subdomainLogPair.Key;
@@ -77,6 +79,11 @@ namespace ISAAR.MSolve.Analyzers.NonLinear
                 //double xNormInc = solver.LinearSystems.First().Value.Solution.Norm2();
                 Debug.WriteLine("NR {0}, first error: {1}, exit error: {2}", iteration, firstError, errorNorm);
                 SaveMaterialStateAndUpdateSolution();
+                if (model.Subdomains[0].hasfailed == true)
+                {
+                    Console.WriteLine("Displacement of failure:");
+                    Console.WriteLine(uPlusdu[1][722]);
+                }
             }
             CopySolutionToSubdomains();
             //            ClearMaterialStresses();

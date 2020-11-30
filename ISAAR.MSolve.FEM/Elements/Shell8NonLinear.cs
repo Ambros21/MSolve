@@ -22,6 +22,7 @@ namespace ISAAR.MSolve.FEM.Elements
     /// </summary>
     public class Shell8NonLinear : IStructuralFiniteElement
     {
+        public bool hasfailed { get; set; }
         protected readonly static IDofType[] nodalDOFTypes = new IDofType[] { StructuralDof.TranslationX, StructuralDof.TranslationY, StructuralDof.TranslationZ, StructuralDof.RotationX, StructuralDof.RotationY };
         protected readonly static IDofType[][] dofTypes = new IDofType[][] { nodalDOFTypes, nodalDOFTypes, nodalDOFTypes,
             nodalDOFTypes, nodalDOFTypes, nodalDOFTypes, nodalDOFTypes, nodalDOFTypes };

@@ -183,22 +183,35 @@ namespace ISAAR.MSolve.Analyzers.Dynamic
 
         public void Solve()
         {
+            bool haswrittenfailure = false;
             int numTimeSteps = (int)(totalTime / timeStep);
             for (int i = 0; i < numTimeSteps; ++i)
             {
-                Debug.WriteLine("Newmark step: {0}", i);
+                if (model.Subdomains[0].hasfailed == false)
+                {
+                    Debug.WriteLine("Newmark step: {0}", i);
 
-                IDictionary<int, IVector> rhsVectors = provider.GetRhsFromHistoryLoad(i);
-                foreach (var l in linearSystems.Values) l.RhsVector = rhsVectors[l.Subdomain.ID];
-                InitializeRhs();
-                CalculateRhsImplicit();
+                    IDictionary<int, IVector> rhsVectors = provider.GetRhsFromHistoryLoad(i);
+                    foreach (var l in linearSystems.Values) l.RhsVector = rhsVectors[l.Subdomain.ID];
+                    InitializeRhs();
+                    CalculateRhsImplicit();
 
-                DateTime start = DateTime.Now;
-                ChildAnalyzer.Solve();
-                DateTime end = DateTime.Now;
+                    DateTime start = DateTime.Now;
+                    ChildAnalyzer.Solve();
+                    DateTime end = DateTime.Now;
 
-                UpdateVelocityAndAcceleration(i);
-                UpdateResultStorages(start, end);
+                    UpdateVelocityAndAcceleration(i);
+                    UpdateResultStorages(start, end);
+                }
+                else
+                {
+                    if (haswrittenfailure == false)
+                    {
+                        Console.WriteLine("Step of failure");
+                        Console.WriteLine(i);
+                        haswrittenfailure = true;
+                    }
+                }
             }
         }
 
@@ -314,6 +327,7 @@ namespace ISAAR.MSolve.Analyzers.Dynamic
                 //TODO: This doesn't work as intended. The solver (previously the LinearSystem) initializes the solution to zero.
                 if (linearSystem.Solution != null) v[id] = linearSystem.Solution.Copy();
                 else v.Add(id, linearSystem.CreateZeroVector());
+                //v[id] = linearSystem.Solution.Copy();
             }
         }
 

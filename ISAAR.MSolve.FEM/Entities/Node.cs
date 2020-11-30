@@ -18,6 +18,7 @@ namespace ISAAR.MSolve.FEM.Entities
     public class Node: CartesianPoint, INode
 	{
         private readonly List<Constraint> constraints = new List<Constraint>();
+        private readonly List<InitialCondition> initialConditions = new List<InitialCondition>();
         private readonly Dictionary<int, Element> elementsDictionary = new Dictionary<int, Element>();
         private readonly Dictionary<int, Subdomain> nonMatchingSubdomainsDictionary = new Dictionary<int, Subdomain>();
         private readonly Dictionary<int, ISubdomain> subdomainsDictionary = new Dictionary<int, ISubdomain>();
@@ -58,6 +59,7 @@ namespace ISAAR.MSolve.FEM.Entities
         }
 
         public List<Constraint> Constraints => constraints;
+        public List<InitialCondition> InitialConditions => initialConditions;
         public Dictionary<int, Element> ElementsDictionary => elementsDictionary; //TODO: This should be IElement
         public Dictionary<int, Subdomain> NonMatchingSubdomainsDictionary => nonMatchingSubdomainsDictionary;
         public Dictionary<int, ISubdomain> SubdomainsDictionary => subdomainsDictionary;
