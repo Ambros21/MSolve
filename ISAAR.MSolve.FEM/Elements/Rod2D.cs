@@ -13,6 +13,7 @@ namespace ISAAR.MSolve.FEM.Problems.Structural.Elements
 {
     public class Rod2D : IStructuralFiniteElement
     {
+        public bool hasfailed { get; set; }
         private static readonly IDofType[] nodalDOFTypes = new IDofType[2] { StructuralDof.TranslationX, StructuralDof.TranslationY };
         private static readonly IDofType[][] dofs = new IDofType[][] { nodalDOFTypes, nodalDOFTypes };
         private readonly double youngModulus;

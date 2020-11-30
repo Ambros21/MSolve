@@ -13,6 +13,7 @@ namespace ISAAR.MSolve.FEM.Elements
 {
     public class EulerBeam2D : IStructuralFiniteElement
     {
+        public bool hasfailed { get; set; }
         private static readonly IDofType[] nodalDOFTypes = new IDofType[3] { StructuralDof.TranslationX, StructuralDof.TranslationY, StructuralDof.RotationZ };
         private static readonly IDofType[][] dofs = new IDofType[][] { nodalDOFTypes, nodalDOFTypes };
         private readonly double youngModulus;

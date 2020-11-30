@@ -10,11 +10,13 @@ using ISAAR.MSolve.FEM.Interfaces;
 using ISAAR.MSolve.LinearAlgebra;
 using ISAAR.MSolve.LinearAlgebra.Matrices;
 using ISAAR.MSolve.Materials.Interfaces;
+using ISAAR.MSolve.PreProcessor.Materials;
 
 namespace ISAAR.MSolve.FEM.Elements
 {
     public class Hexa8u8p : IPorousFiniteElement
     {
+        public bool hasfailed { get; set; }
         protected static int iInt = 2;
         protected static int iInt2 = iInt * iInt;
         protected static int iInt3 = iInt * iInt * iInt;
@@ -104,6 +106,7 @@ namespace ISAAR.MSolve.FEM.Elements
 
         public Hexa8u8p(IIsotropicContinuumMaterial3D material)
         {
+            hasfailed = false;
             //throw new NotImplementedException();
             materialsAtGaussPoints = new IIsotropicContinuumMaterial3D[Hexa8u8p.iInt3];
             for (int i = 0; i < Hexa8u8p.iInt3; i++)
@@ -138,8 +141,8 @@ namespace ISAAR.MSolve.FEM.Elements
         public double PoreA { get; set; } = 1;
         public double Xw { get; set; } = 1;
         public double Cs { get; set; } = 0;
-        public double RayleighAlpha { get; set; } = 1.178;
-        public double RayleighBeta { get; set; } = 0.00159;
+        public double RayleighAlpha { get; set; } = 1;
+        public double RayleighBeta { get; set; } = 0.001;
 
         public double SolidBulkModulus => (materialsAtGaussPoints[0].YoungModulus + materialsAtGaussPoints[1].YoungModulus) / (6 - 12 * materialsAtGaussPoints[0].PoissonRatio);
 
@@ -349,6 +352,7 @@ namespace ISAAR.MSolve.FEM.Elements
             for (int i = 0; i < materialsAtGaussPoints.Length; i++)
                 for (int j = 0; j < 6; j++) faStresses[i, j] = materialsAtGaussPoints[i].Stresses[j];
 
+
             double[,] faXYZ = GetCoordinates(element);
             double[,] faDS = new double[iInt3, 24];
             double[,] faS = new double[iInt3, 8];
@@ -483,6 +487,13 @@ namespace ISAAR.MSolve.FEM.Elements
         public void SaveMaterialState()
         {
             foreach (IContinuumMaterial3D m in materialsAtGaussPoints) m.SaveState();
+            foreach (IContinuumMaterial3D m in materialsAtGaussPoints)
+            {
+                if (m.hasfailed == true)
+                {
+                    this.hasfailed = true;
+                }
+            }
         }
 
         public void ClearMaterialStresses()

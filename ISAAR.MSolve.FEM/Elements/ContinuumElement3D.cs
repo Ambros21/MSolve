@@ -24,6 +24,7 @@ namespace ISAAR.MSolve.FEM.Elements
     /// </summary>
     public class ContinuumElement3D : IStructuralFiniteElement, ICell<Node>
     {
+        public bool hasfailed { get; set; }
         private readonly static IDofType[] nodalDOFTypes = new IDofType[] 
         {
             StructuralDof.TranslationX, StructuralDof.TranslationY, StructuralDof.TranslationZ

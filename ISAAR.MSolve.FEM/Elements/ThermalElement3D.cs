@@ -17,6 +17,7 @@ namespace ISAAR.MSolve.FEM.Elements
 {
     public class ThermalElement3D : IFiniteElement, ICell<Node>
     {
+        public bool hasfailed { get; set; }
         private readonly static IDofType[] nodalDOFTypes = new IDofType[] { ThermalDof.Temperature };
         private readonly IDofType[][] dofTypes; //TODO: this should not be stored for each element. Instead store it once for each Quad4, Tri3, etc. Otherwise create it on the fly.
         private readonly ThermalMaterial material;

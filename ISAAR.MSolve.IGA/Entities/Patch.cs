@@ -155,6 +155,7 @@ namespace ISAAR.MSolve.IGA.Entities
 
         public ISubdomainConstrainedDofOrdering ConstrainedDofRowOrdering { get; set; }
         public ISubdomainConstrainedDofOrdering ConstrainedDofColOrdering { get; set; }
+        public bool hasfailed { get; set; }
         #endregion
 
 

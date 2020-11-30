@@ -75,6 +75,8 @@ namespace ISAAR.MSolve.Materials
             }
         }
 
+        public bool hasfailed { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
         public void UpdateMaterial(double[] strainsIncrement)
         {
             //throw new NotImplementedException();

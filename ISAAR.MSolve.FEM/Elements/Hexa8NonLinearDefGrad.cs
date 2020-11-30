@@ -23,6 +23,7 @@ namespace ISAAR.MSolve.FEM.Elements
     /// </summary>
     public class Hexa8NonLinearDefGrad : IStructuralFiniteElement, IEmbeddedHostElement
     {
+        public bool hasfailed { get; set; }
         protected readonly static IDofType[] nodalDOFTypes = new IDofType[] { StructuralDof.TranslationX, StructuralDof.TranslationY, StructuralDof.TranslationZ };
         protected readonly static IDofType[][] dofTypes = new IDofType[][] { nodalDOFTypes, nodalDOFTypes, nodalDOFTypes,
             nodalDOFTypes, nodalDOFTypes, nodalDOFTypes, nodalDOFTypes, nodalDOFTypes };

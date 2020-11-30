@@ -18,6 +18,7 @@ namespace ISAAR.MSolve.FEM.Elements
 
     public class SpringDamper3D : IStructuralFiniteElement
     {
+        public bool hasfailed { get; set; }
         private static readonly IDofType[] nodalDOFTypes = new IDofType[] { StructuralDof.TranslationX, StructuralDof.TranslationY, StructuralDof.TranslationZ };
         private static readonly IDofType[][] dofs = new IDofType[][] { nodalDOFTypes, nodalDOFTypes };
         private readonly double springCoefficient, dampingCoefficient;

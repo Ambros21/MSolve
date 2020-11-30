@@ -6,6 +6,8 @@ namespace ISAAR.MSolve.Materials.Interfaces
     {
         double[] Stresses { get; }
         IMatrixView ConstitutiveMatrix { get; }
+        bool hasfailed { get; set; }
+
         void UpdateMaterial(double[] strains);
     }
 }

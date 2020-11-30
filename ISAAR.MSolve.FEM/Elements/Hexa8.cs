@@ -18,6 +18,7 @@ namespace ISAAR.MSolve.FEM.Elements
 {
     public class Hexa8 : IStructuralFiniteElement, IEmbeddedHostElement
     {
+        public bool hasfailed { get; set; }
         protected static double determinantTolerance = 0.00000001;
         protected static int iInt = 2;
         protected static int iInt2 = iInt * iInt;
