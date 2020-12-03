@@ -56,8 +56,8 @@ namespace ISAAR.MSolve.Analyzers.NonLinear
 
                     if (errorNorm < residualTolerance)
                     {
-                        var str = uPlusdu[1][722].ToString();
-                        Console.WriteLine(str);
+                        //var str = uPlusdu[1][722].ToString();
+                        //Console.WriteLine(str);
                         foreach (var subdomainLogPair in IncrementalLogs)
                         {
                             int subdomainID = subdomainLogPair.Key;

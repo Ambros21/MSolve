@@ -369,10 +369,10 @@ namespace ISAAR.MSolve.SamplesConsole
             stresstoch = new double[montecarlosim - indexbegin];
             for (int index = indexbegin; index < montecarlosim; index++)
             {
-                for (int lambdaint = 0; lambdaint < (int)(1000 / 150); lambdaint++)
+                for (int lambdaint = 0; lambdaint < 570; lambdaint++)
                 {
                     hasfailed = false;
-                    SolveStochasticHexaSoil(index, Stoch1[index], Stoch2[index], readMatrixDataPartially(Stoch3, index, index, 0, 7), readMatrixDataPartially(Stoch3, 0, 7, 8, 8),(lambdaint+1)*0.01+2.84);
+                    SolveStochasticHexaSoil(index, Stoch1[index], Stoch2[index], readMatrixDataPartially(Stoch3, index, index, 0, 7), readMatrixDataPartially(Stoch3, 0, 7, 8, 8),(lambdaint+1)*0.01+1);
                     if (hasfailed == true) break;
                 }
                 //SolveStochasticHexaSoil(index, Stoch1[index], Stoch2[index], Stoch3[index]);
@@ -388,8 +388,8 @@ namespace ISAAR.MSolve.SamplesConsole
             //          SolveStochasticHexaSoil(index, Stoch1[index], Stoch2[index], readMatrixDataPartially(Stoch3, index, index, 0, 7), readMatrixDataPartially(Stoch3, 0, 7, 8, 8));
             //          Console.WriteLine(index);
             //      });
-            //DateTime end = DateTime.Now;
-            //writeTime(begin, end);
+            DateTime end = DateTime.Now;
+            writeTime(begin, end);
             //writeData(dispstoch, 1, "displacements.txt");
             //writeData(dispstoch150, 1, "displacements150.txt");
             //writeData(stresstoch, 1, "stresses.txt");
