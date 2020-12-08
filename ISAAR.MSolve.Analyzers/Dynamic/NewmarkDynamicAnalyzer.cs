@@ -31,7 +31,7 @@ namespace ISAAR.MSolve.Analyzers.Dynamic
         private Dictionary<int, IVector> v = new Dictionary<int, IVector>();
         private Dictionary<int, IVector> v1 = new Dictionary<int, IVector>();
         private Dictionary<int, IVector> v2 = new Dictionary<int, IVector>();
-
+        public int failstep = 0;
         private NewmarkDynamicAnalyzer(IStructuralModel model, ISolver solver, IImplicitIntegrationProvider provider,
             IChildAnalyzer childAnalyzer, double timeStep, double totalTime, double alpha, double delta)
         {
@@ -208,7 +208,8 @@ namespace ISAAR.MSolve.Analyzers.Dynamic
                     if (haswrittenfailure == false)
                     {
                         Console.WriteLine("Step of failure");
-                        Console.WriteLine(i);
+                        Console.WriteLine(i); //transfer this info to a variable called failstep. 
+                        failstep = i;
                         haswrittenfailure = true;
                     }
                 }

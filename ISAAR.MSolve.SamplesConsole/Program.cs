@@ -147,6 +147,8 @@ namespace ISAAR.MSolve.SamplesConsole
         public static int montecarlosim;
         public static int indexbegin;
         public static bool hasfailed = false;
+        public static int stepoffail = 0;
+        public static double dispfail = 0.0;
         public static double[] increments;
         public static double[] dispstoch;
         public static double[] dispstoch150;
@@ -294,6 +296,14 @@ namespace ISAAR.MSolve.SamplesConsole
         }
         #endregion
         #region solvermethods
+        private static void CollectMonteCarloFailDetails(double lambda)
+        {
+            Console.WriteLine("Displacement of failure: ");
+            Console.WriteLine(dispfail);
+            Console.WriteLine("Fail load in Kpa");
+            Console.WriteLine(lambda * 150.0);
+            Console.WriteLine("End of one Monte Carlo Sample.");
+        }
         private static void SolveHexaSoil()
         {
         }
@@ -321,7 +331,7 @@ namespace ISAAR.MSolve.SamplesConsole
             LoadControlAnalyzer childAnalyzer = childAnalyzerBuilder.Build();
             var parentAnalyzerBuilder = new NewmarkDynamicAnalyzer.Builder(model, solver, provider, childAnalyzer, 0.001, 1);
             NewmarkDynamicAnalyzer parentAnalyzer = parentAnalyzerBuilder.Build();
-
+           
             parentAnalyzer.Initialize();
             parentAnalyzer.Solve();
             int monitorDof = HexaSoil2.ProvideIdMonitor(model);
@@ -329,10 +339,10 @@ namespace ISAAR.MSolve.SamplesConsole
             var hhhh = model.GlobalDofOrdering.GlobalFreeDofs[nn, StructuralDof.TranslationZ];
             if (model.Subdomains[0].hasfailed==true)
             {
-                Console.WriteLine("Fail peak load in Kpa");
-                Console.WriteLine(lambda * 150);
-                Console.WriteLine("End of one Monte Carlo Sample.");
+                dispfail = childAnalyzer.dispfail;
+                stepoffail = parentAnalyzer.failstep;
                 hasfailed = true;
+                Console.WriteLine("XXXXXXXXXXXXXXXXXXXX"); //In order to erase it as a previous iteration.
             }
             var d = 0;
             //dispstoch[samplenumber] = analyzer.displacements[analyzer.failinc-1];
@@ -369,14 +379,14 @@ namespace ISAAR.MSolve.SamplesConsole
             stresstoch = new double[montecarlosim - indexbegin];
             for (int index = indexbegin; index < montecarlosim; index++)
             {
-                for (int lambdaint = 0; lambdaint < 570; lambdaint++)
+               double lambda = 600 / 150;
+                while (!(hasfailed == true && stepoffail > 995))
                 {
                     hasfailed = false;
-                    SolveStochasticHexaSoil(index, Stoch1[index], Stoch2[index], readMatrixDataPartially(Stoch3, index, index, 0, 7), readMatrixDataPartially(Stoch3, 0, 7, 8, 8),(lambdaint+1)*0.01+1);
-                    if (hasfailed == true) break;
+                    SolveStochasticHexaSoil(index, Stoch1[index], Stoch2[index], readMatrixDataPartially(Stoch3, index, index, 0, 7), readMatrixDataPartially(Stoch3, 0, 7, 8, 8), lambda);
+                    lambda = lambda * stepoffail / 1000;
                 }
-                //SolveStochasticHexaSoil(index, Stoch1[index], Stoch2[index], Stoch3[index]);
-                //Console.WriteLine(index);
+                CollectMonteCarloFailDetails(lambda);
             }
             //for (int i = 0; i < 1; i++)
             //{

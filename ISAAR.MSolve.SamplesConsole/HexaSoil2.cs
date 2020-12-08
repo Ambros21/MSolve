@@ -154,7 +154,7 @@ namespace ISAAR.MSolve.SamplesConsole
                     }
                     for (int i = 0; i < gpNo; i++)
                     {
-                         elementType2.Permeability[i] = elementType2.Permeability[i];
+                         elementType2.Permeability[i] = elementType2.Permeability[i]*3600*24;
                         // elementType2.Permeability[i] = 10^-8*3600*24;
                     }
                     e1 = new Element()

@@ -11,6 +11,7 @@ namespace ISAAR.MSolve.Analyzers.NonLinear
 {
     public class LoadControlAnalyzer : NonLinearAnalyzerBase
     {
+        public double dispfail = 0.0;
         private Dictionary<int, IVector> internalRhsVectors;
         private LoadControlAnalyzer(IStructuralModel model, ISolver solver, INonLinearProvider provider,
             IReadOnlyDictionary<int, INonLinearSubdomainUpdater> subdomainUpdaters,
@@ -81,8 +82,7 @@ namespace ISAAR.MSolve.Analyzers.NonLinear
                 SaveMaterialStateAndUpdateSolution();
                 if (model.Subdomains[0].hasfailed == true)
                 {
-                    Console.WriteLine("Displacement of failure:");
-                    Console.WriteLine(uPlusdu[1][722]);
+                    dispfail = uPlusdu[1][722];
                 }
             }
             CopySolutionToSubdomains();
