@@ -21,6 +21,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using ISAAR.MSolve.Analyzers.Interfaces;
+using System.Diagnostics;
 
 namespace ISAAR.MSolve.SamplesConsole
 {
@@ -342,6 +343,8 @@ namespace ISAAR.MSolve.SamplesConsole
                 dispfail = childAnalyzer.dispfail;
                 stepoffail = parentAnalyzer.failstep;
                 hasfailed = true;
+                Console.WriteLine("Step of fail");
+                Console.WriteLine(stepoffail);
                 Console.WriteLine("XXXXXXXXXXXXXXXXXXXX"); //In order to erase it as a previous iteration.
             }
             var d = 0;
@@ -379,12 +382,50 @@ namespace ISAAR.MSolve.SamplesConsole
             stresstoch = new double[montecarlosim - indexbegin];
             for (int index = indexbegin; index < montecarlosim; index++)
             {
-               double lambda = 600 / 150;
-                while (!(hasfailed == true && stepoffail > 995))
+               double lambda = 650.0 / 150.0;
+                double lambdaprev = 1.1*lambda;
+                double maxlambdaofnofailure = 0.0;
+                bool isfirstiter = true;
+                while (!(hasfailed == true && stepoffail > 899))
                 {
+                    if (hasfailed == true)
+                    {
+                        lambdaprev = lambda;
+                        if (maxlambdaofnofailure == 0)
+                        {
+                            lambda = 0.5 * (lambda * stepoffail / 1000.0 + lambdaprev);
+                        }
+                        else
+                        {
+                            lambda = 0.5 * (maxlambdaofnofailure + lambdaprev);
+                        }
+                    }
+                    else
+                    {
+                        if (isfirstiter)
+                        {
+                            isfirstiter = false;
+                        }
+                        else
+                        {
+                            if (maxlambdaofnofailure != 0 && maxlambdaofnofailure < lambda)
+                            {
+                                maxlambdaofnofailure = lambda;
+                            }
+                            if (maxlambdaofnofailure == 0)                             
+                            {
+                                maxlambdaofnofailure = lambda;
+                                lambda = 0.5 * (lambda + lambdaprev);
+                            }
+                            else
+                            {
+                                lambda = 0.5 * (maxlambdaofnofailure + lambdaprev);
+                            }
+                        }
+                    }
+                    Debug.WriteLine("Previous Lambda {0} Current Lambda {1}", lambdaprev, lambda);
                     hasfailed = false;
                     SolveStochasticHexaSoil(index, Stoch1[index], Stoch2[index], readMatrixDataPartially(Stoch3, index, index, 0, 7), readMatrixDataPartially(Stoch3, 0, 7, 8, 8), lambda);
-                    lambda = lambda * stepoffail / 1000;
                 }
                 CollectMonteCarloFailDetails(lambda);
             }
