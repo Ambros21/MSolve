@@ -154,6 +154,7 @@ namespace ISAAR.MSolve.SamplesConsole
         public static double[] dispstoch;
         public static double[] dispstoch150;
         public static double[] stresstoch;
+        public static int numofsample = 0;
         #region readwritemethods
         public static void readData(string DataFileName, out double[] array)
         {
@@ -303,7 +304,8 @@ namespace ISAAR.MSolve.SamplesConsole
             Console.WriteLine(dispfail);
             Console.WriteLine("Fail load in Kpa");
             Console.WriteLine(lambda * 150.0);
-            Console.WriteLine("End of one Monte Carlo Sample.");
+            Console.WriteLine("End of {0} Monte Carlo Sample.",numofsample+1);
+            numofsample++;
         }
         private static void SolveHexaSoil()
         {
@@ -385,7 +387,7 @@ namespace ISAAR.MSolve.SamplesConsole
                 double maxlambdaofnofailure = 0.0;
                 bool isfirstiter = true;
                 hasfailed = false;
-                while (!(hasfailed == true && stepoffail > 899))
+                while (!(hasfailed == true))
                 {
                     if (hasfailed == true)
                     {
