@@ -384,6 +384,7 @@ namespace ISAAR.MSolve.SamplesConsole
                 double lambdaprev = 1.1*lambda;
                 double maxlambdaofnofailure = 0.0;
                 bool isfirstiter = true;
+                hasfailed = false;
                 while (!(hasfailed == true && stepoffail > 899))
                 {
                     if (hasfailed == true)
