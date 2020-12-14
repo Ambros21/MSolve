@@ -343,8 +343,6 @@ namespace ISAAR.MSolve.SamplesConsole
                 dispfail = childAnalyzer.dispfail;
                 stepoffail = parentAnalyzer.failstep;
                 hasfailed = true;
-                Console.WriteLine("Step of fail");
-                Console.WriteLine(stepoffail);
                 Console.WriteLine("XXXXXXXXXXXXXXXXXXXX"); //In order to erase it as a previous iteration.
             }
             var d = 0;
@@ -386,6 +384,7 @@ namespace ISAAR.MSolve.SamplesConsole
                 double lambdaprev = 1.1*lambda;
                 double maxlambdaofnofailure = 0.0;
                 bool isfirstiter = true;
+                hasfailed = false;
                 while (!(hasfailed == true && stepoffail > 899))
                 {
                     if (hasfailed == true)
