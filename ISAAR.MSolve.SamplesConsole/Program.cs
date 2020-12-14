@@ -343,8 +343,6 @@ namespace ISAAR.MSolve.SamplesConsole
                 dispfail = childAnalyzer.dispfail;
                 stepoffail = parentAnalyzer.failstep;
                 hasfailed = true;
-                Console.WriteLine("Step of fail");
-                Console.WriteLine(stepoffail);
                 Console.WriteLine("XXXXXXXXXXXXXXXXXXXX"); //In order to erase it as a previous iteration.
             }
             var d = 0;
