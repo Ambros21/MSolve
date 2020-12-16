@@ -382,12 +382,14 @@ namespace ISAAR.MSolve.SamplesConsole
             stresstoch = new double[montecarlosim - indexbegin];
             for (int index = indexbegin; index < montecarlosim; index++)
             {
-               double lambda = 650.0 / 150.0;
+               double lambda = 1650.0 / 150.0;
                 double lambdaprev = 1.1*lambda;
                 double maxlambdaofnofailure = 0.0;
+                double thislambdac = lambda;
+                double previouslambdac = 0.0;
                 bool isfirstiter = true;
                 hasfailed = false;
-                while (!(hasfailed == true))
+                while (!(hasfailed == true && Math.Abs((thislambdac - previouslambdac) / thislambdac)<0.01))
                 {
                     if (hasfailed == true)
                     {
@@ -427,6 +429,11 @@ namespace ISAAR.MSolve.SamplesConsole
                     Debug.WriteLine("Previous Lambda {0} Current Lambda {1}", lambdaprev, lambda);
                     hasfailed = false;
                     SolveStochasticHexaSoil(index, Stoch1[index], Stoch2[index], readMatrixDataPartially(Stoch3, index, index, 0, 7), readMatrixDataPartially(Stoch3, 0, 7, 8, 8), lambda);
+                    if (hasfailed == true)
+                    {
+                        previouslambdac = thislambdac;
+                        thislambdac = lambdaprev;
+                    }
                 }
                 CollectMonteCarloFailDetails(lambda);
             }
