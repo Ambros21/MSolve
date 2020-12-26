@@ -303,7 +303,7 @@ namespace ISAAR.MSolve.SamplesConsole
             Console.WriteLine("Displacement of failure: ");
             Console.WriteLine(dispfail);
             Console.WriteLine("Fail load in Kpa");
-            Console.WriteLine(lambda * 150.0);
+            Console.WriteLine(lambda * 150.0*stepoffail/1000);
             Console.WriteLine("End of {0} Monte Carlo Sample.",numofsample+1);
             numofsample++;
         }
@@ -326,7 +326,7 @@ namespace ISAAR.MSolve.SamplesConsole
             var provider = new ProblemStructural(model, solver);
             LibrarySettings.LinearAlgebraProviders = LinearAlgebraProviderChoice.MKL;
 
-            int increments = 1000;
+            int increments = 10;
             var childAnalyzerBuilder = new LoadControlAnalyzer.Builder(model, solver, provider, increments);
             childAnalyzerBuilder.ResidualTolerance = 1E-5;
             childAnalyzerBuilder.MaxIterationsPerIncrement = 100;
@@ -335,7 +335,7 @@ namespace ISAAR.MSolve.SamplesConsole
             var parentAnalyzer = new StaticAnalyzer(model, solver, provider, childAnalyzer);
             //var parentAnalyzerBuilder = new NewmarkDynamicAnalyzer.Builder(model, solver, provider, childAnalyzer, 0.001, 1);
             //NewmarkDynamicAnalyzer parentAnalyzer = parentAnalyzerBuilder.Build();
-           
+            
             parentAnalyzer.Initialize();
             parentAnalyzer.Solve();
             int monitorDof = HexaSoil2.ProvideIdMonitor(model);
@@ -383,59 +383,9 @@ namespace ISAAR.MSolve.SamplesConsole
             stresstoch = new double[montecarlosim - indexbegin];
             for (int index = indexbegin; index < montecarlosim; index++)
             {
-               double lambda = 1650.0 / 150.0;
-                double lambdaprev = 1.1*lambda;
-                double maxlambdaofnofailure = 0.0;
-                double thislambdac = lambda;
-                double previouslambdac = 0.0;
-                bool isfirstiter = true;
-                hasfailed = false;
-                while (!(hasfailed == true && Math.Abs((thislambdac - previouslambdac) / thislambdac)<0.01))
-                {
-                    if (hasfailed == true)
-                    {
-                        lambdaprev = lambda;
-                        if (maxlambdaofnofailure == 0)
-                        {
-                            lambda = 0.5 * (lambda * stepoffail / 1000.0 + lambdaprev);
-                        }
-                        else
-                        {
-                            lambda = 0.5 * (maxlambdaofnofailure + lambdaprev);
-                        }
-                    }
-                    else
-                    {
-                        if (isfirstiter)
-                        {
-                            isfirstiter = false;
-                        }
-                        else
-                        {
-                            if (maxlambdaofnofailure != 0 && maxlambdaofnofailure < lambda)
-                            {
-                                maxlambdaofnofailure = lambda;
-                            }
-                            if (maxlambdaofnofailure == 0)                             
-                            {
-                                maxlambdaofnofailure = lambda;
-                                lambda = 0.5 * (lambda + lambdaprev);
-                            }
-                            else
-                            {
-                                lambda = 0.5 * (maxlambdaofnofailure + lambdaprev);
-                            }
-                        }
-                    }
-                    Debug.WriteLine("Previous Lambda {0} Current Lambda {1}", lambdaprev, lambda);
+               double lambda = 1000.0 / 150.0;
                     hasfailed = false;
                     SolveStochasticHexaSoil(index, Stoch1[index], Stoch2[index], readMatrixDataPartially(Stoch3, index, index, 0, 7), readMatrixDataPartially(Stoch3, 0, 7, 8, 8), lambda);
-                    if (hasfailed == true)
-                    {
-                        previouslambdac = thislambdac;
-                        thislambdac = lambdaprev;
-                    }
-                }
                 CollectMonteCarloFailDetails(lambda);
             }
             //for (int i = 0; i < 1; i++)

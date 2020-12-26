@@ -106,7 +106,7 @@ namespace ISAAR.MSolve.SamplesConsole
                         gaussPointMaterials[i] = new KavvadasClays(young, poisson, alpha, ksi);
                     var elementType1 = new Hexa8Fixed(gaussPointMaterials);
                     var gaussPoints = elementType1.CalculateGaussMatrices(nodeCoordinates);
-                    var elementType2 = new Hexa8Fixed(gaussPointMaterials); //this because hexa8u8p has not all the fortran that hexa8 has.
+                    var elementType2 = new Hexa8(gaussPointMaterials); //this because hexa8u8p has not all the fortran that hexa8 has.
                     for (int i = 0; i < gpNo; i++)
                     {
                         var ActualZeta = 0.0;
@@ -133,7 +133,7 @@ namespace ISAAR.MSolve.SamplesConsole
                         gaussPointMaterials[i] = new KavvadasClays(Stoch1, Stoch2, 1, ksi, initialStresses,Htot,Coord);
                     }
                     //elementType1 = new Hexa8(gaussPointMaterials);
-                    elementType2 = new Hexa8Fixed(gaussPointMaterials);
+                    elementType2 = new Hexa8(gaussPointMaterials);
                     e1 = new Element()
                     {
                         ID = IDhelp
@@ -277,8 +277,8 @@ namespace ISAAR.MSolve.SamplesConsole
             double nodalLoad = 0.0;
             foreach (Node nodecheck in model.NodesDictionary.Values)
             {
-                Load loadinitialz = new Load();
-                nodalLoad = 0.0;
+                 Load loadinitialz = new Load();
+                 nodalLoad = 0.0;
                 foreach (Element elementcheck in model.ElementsDictionary.Values)
                 {
                     var Pa = lambda*-3750.0;
@@ -326,6 +326,8 @@ namespace ISAAR.MSolve.SamplesConsole
                     //var timeFunction = new RampTemporalFunction(nodalLoad, totalDuration, timeStepDuration, constantsegmentdurationratio * totalDuration);
                     //loadinitialz = new GeneralDynamicNodalLoad(nodecheck, StructuralDof.TranslationZ, timeFunction);
                     //model.TimeDependentNodalLoads.Add(loadinitialz);
+                    loadinitialz.Node = nodecheck;
+                    loadinitialz.DOF = StructuralDof.TranslationZ;
                     loadinitialz.Amount = nodalLoad;
                     model.Loads.Add(loadinitialz);
                 }
@@ -367,7 +369,7 @@ namespace ISAAR.MSolve.SamplesConsole
                         {
                             if (boolx && booly && boolz == true)
                             {
-                                Monitor = 4 * nodeid - 2 + ((int)(hx / LengthX) + 1) * ((int)(hy / LengthY) + 1);
+                                Monitor = 3 * nodeid - 1 + 0*((int)(hx / LengthX) + 1) * ((int)(hy / LengthY) + 1);
                             }
                         }
                         if (Z != 0)

@@ -917,7 +917,7 @@ namespace ISAAR.MSolve.PreProcessor.Materials
             }
             CC = FBSE(PAR, QH[1], Stresses);
             dummy = Math.Pow(BB, 2) - AA * CC;
-            XLamda = (-BB + Math.Sqrt(dummy)) / (AA);
+            XLamda = (-BB + Math.Sqrt(Math.Abs(dummy))) / (AA);
             if (CC == 0)
             {
                 XLamda = 1;
@@ -952,7 +952,7 @@ namespace ISAAR.MSolve.PreProcessor.Materials
             }
             CC = FPYE(PAR, QH, Stresses);
             dummy = Math.Pow(BB, 2) - AA * CC;
-            XLamda = (-BB + Math.Sqrt(dummy)) / (AA);
+            XLamda = (-BB + Math.Sqrt(Math.Abs(dummy))) / (AA);
             if (CC == 0)
             {
                 XLamda = 1;

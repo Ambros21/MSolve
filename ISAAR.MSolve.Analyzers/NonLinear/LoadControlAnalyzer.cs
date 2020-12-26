@@ -39,11 +39,11 @@ namespace ISAAR.MSolve.Analyzers.NonLinear
                     int iteration = 0;
                     for (iteration = 0; iteration < maxIterationsPerIncrement; iteration++)
                     {
-                        if (iteration == 0)
-                        {
-                            internalRhsVectors = CalculateInternalRhsatfirstiteration(increment, iteration);
-                            double residualNormCurrentfirstiter = UpdateResidualForcesAndNormatfirstiteration(increment, internalRhsVectors);
-                        }
+                        //if (iteration == 0)
+                        //{
+                        //    internalRhsVectors = CalculateInternalRhsatfirstiteration(increment, iteration);
+                        //    double residualNormCurrentfirstiter = UpdateResidualForcesAndNormatfirstiteration(increment, internalRhsVectors);
+                        //}
                         if (iteration == maxIterationsPerIncrement - 1) return;
                         if (Double.IsNaN(errorNorm)) return;
                         solver.Solve();
@@ -85,7 +85,7 @@ namespace ISAAR.MSolve.Analyzers.NonLinear
                     SaveMaterialStateAndUpdateSolution();
                     if (model.Subdomains[0].hasfailed == true)
                     {
-                        dispfail = uPlusdu[1][722];
+                        dispfail = uPlusdu[1][365];
                         failstep = increment;
                     }
                 }
