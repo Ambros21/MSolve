@@ -100,13 +100,13 @@ namespace ISAAR.MSolve.SamplesConsole
                     var poisson = 0.3;
                     var alpha = 1.0;
                     var ksi = 0.02;
-                    var gamma = 10;  //effective stress
+                    var gamma = 20;  //effective stress
                     var Htot = hz;
                     for (int i = 0; i < gpNo; i++)
                         gaussPointMaterials[i] = new KavvadasClays(young, poisson, alpha, ksi);
                     var elementType1 = new Hexa8Fixed(gaussPointMaterials);
                     var gaussPoints = elementType1.CalculateGaussMatrices(nodeCoordinates);
-                    var elementType2 = new Hexa8u8p(gaussPointMaterials); //this because hexa8u8p has not all the fortran that hexa8 has.
+                    var elementType2 = new Hexa8Fixed(gaussPointMaterials); //this because hexa8u8p has not all the fortran that hexa8 has.
                     for (int i = 0; i < gpNo; i++)
                     {
                         var ActualZeta = 0.0;
@@ -133,30 +133,7 @@ namespace ISAAR.MSolve.SamplesConsole
                         gaussPointMaterials[i] = new KavvadasClays(Stoch1, Stoch2, 1, ksi, initialStresses,Htot,Coord);
                     }
                     //elementType1 = new Hexa8(gaussPointMaterials);
-                    elementType2 = new Hexa8u8p(gaussPointMaterials);
-                    for (int i = 0; i < gpNo; i++)
-                    {
-                        var ActualZeta = 0.0;
-                        var help = elementType1.CalcH8Shape(gaussPoints[i].Xi, gaussPoints[i].Eta, gaussPoints[i].Zeta);
-                        for (int j = 0; j < gpNo; j++)
-                        {
-                            ActualZeta += help[j] * nodeCoordinates[j, 2];
-                        }
-                        for (int j = 0; j < 8; j = j + 2)
-                        {
-                            elementType2.Permeability[i] += Stoch3[j] * Math.Cos(omega[j] * ActualZeta);
-                        }
-                        for (int j = 1; j < 8; j = j + 2)
-                        {
-                            elementType2.Permeability[i] += Stoch3[j] * Math.Sin(omega[j] * ActualZeta);
-                        }
-                        elementType2.Permeability[i] = Math.Abs((elementType2.Permeability[i]) * 0.25 * Math.Pow(10, -8) + Math.Pow(10, -8)) / 1;
-                    }
-                    for (int i = 0; i < gpNo; i++)
-                    {
-                         elementType2.Permeability[i] = elementType2.Permeability[i]*3600*24;
-                        // elementType2.Permeability[i] = 10^-8*3600*24;
-                    }
+                    elementType2 = new Hexa8Fixed(gaussPointMaterials);
                     e1 = new Element()
                     {
                         ID = IDhelp
@@ -298,12 +275,9 @@ namespace ISAAR.MSolve.SamplesConsole
             //}
             #endregion
             double nodalLoad = 0.0;
-            double totalDuration = 1;
-            double timeStepDuration = 0.001;
-            double constantsegmentdurationratio = 1;
-            GeneralDynamicNodalLoad loadinitialz;
             foreach (Node nodecheck in model.NodesDictionary.Values)
             {
+                Load loadinitialz = new Load();
                 nodalLoad = 0.0;
                 foreach (Element elementcheck in model.ElementsDictionary.Values)
                 {
@@ -349,9 +323,11 @@ namespace ISAAR.MSolve.SamplesConsole
                 }
                 if (nodalLoad != 0)
                 {
-                    var timeFunction = new RampTemporalFunction(nodalLoad, totalDuration, timeStepDuration, constantsegmentdurationratio * totalDuration);
-                    loadinitialz = new GeneralDynamicNodalLoad(nodecheck, StructuralDof.TranslationZ, timeFunction);
-                    model.TimeDependentNodalLoads.Add(loadinitialz);
+                    //var timeFunction = new RampTemporalFunction(nodalLoad, totalDuration, timeStepDuration, constantsegmentdurationratio * totalDuration);
+                    //loadinitialz = new GeneralDynamicNodalLoad(nodecheck, StructuralDof.TranslationZ, timeFunction);
+                    //model.TimeDependentNodalLoads.Add(loadinitialz);
+                    loadinitialz.Amount = nodalLoad;
+                    model.Loads.Add(loadinitialz);
                 }
             }
         }

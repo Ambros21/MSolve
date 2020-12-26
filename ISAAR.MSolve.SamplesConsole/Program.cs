@@ -323,17 +323,18 @@ namespace ISAAR.MSolve.SamplesConsole
             //var solverBuilder = new SkylineSolver.Builder();
             ISolver solver = solverBuilder.BuildSolver(model);
 
-            var provider = new ProblemPorous(model, solver);
+            var provider = new ProblemStructural(model, solver);
             LibrarySettings.LinearAlgebraProviders = LinearAlgebraProviderChoice.MKL;
 
-            int increments = 1;
+            int increments = 1000;
             var childAnalyzerBuilder = new LoadControlAnalyzer.Builder(model, solver, provider, increments);
             childAnalyzerBuilder.ResidualTolerance = 1E-5;
             childAnalyzerBuilder.MaxIterationsPerIncrement = 100;
             childAnalyzerBuilder.NumIterationsForMatrixRebuild = 1;
             LoadControlAnalyzer childAnalyzer = childAnalyzerBuilder.Build();
-            var parentAnalyzerBuilder = new NewmarkDynamicAnalyzer.Builder(model, solver, provider, childAnalyzer, 0.001, 1);
-            NewmarkDynamicAnalyzer parentAnalyzer = parentAnalyzerBuilder.Build();
+            var parentAnalyzer = new StaticAnalyzer(model, solver, provider, childAnalyzer);
+            //var parentAnalyzerBuilder = new NewmarkDynamicAnalyzer.Builder(model, solver, provider, childAnalyzer, 0.001, 1);
+            //NewmarkDynamicAnalyzer parentAnalyzer = parentAnalyzerBuilder.Build();
            
             parentAnalyzer.Initialize();
             parentAnalyzer.Solve();
@@ -343,7 +344,7 @@ namespace ISAAR.MSolve.SamplesConsole
             if (model.Subdomains[0].hasfailed==true)
             {
                 dispfail = childAnalyzer.dispfail;
-                stepoffail = parentAnalyzer.failstep;
+                stepoffail = childAnalyzer.failstep;
                 hasfailed = true;
                 Console.WriteLine("XXXXXXXXXXXXXXXXXXXX"); //In order to erase it as a previous iteration.
             }
