@@ -142,8 +142,8 @@ namespace ISAAR.MSolve.SamplesConsole
         }
         #endregion
         #region HexaProgramCode
-        public static double[] Stoch1;
-        public static double[] Stoch2;
+        public static double[,] Stoch1;
+        public static double[,] Stoch2;
         public static double[,] Stoch3;
         public static int montecarlosim;
         public static int indexbegin;
@@ -310,7 +310,7 @@ namespace ISAAR.MSolve.SamplesConsole
         private static void SolveHexaSoil()
         {
         }
-        private static void SolveStochasticHexaSoil(int samplenumber, double Stoch1, double Stoch2, double[] Stoch3, double[] omega,double lambda)
+        private static void SolveStochasticHexaSoil(int samplenumber, double[] Stoch1, double[] Stoch2, double[] Stoch3, double[] omega,double lambda)
         {
             Model model = new Model();
             model.SubdomainsDictionary.Add(1, new Subdomain(1));
@@ -366,8 +366,8 @@ namespace ISAAR.MSolve.SamplesConsole
         static void Main(string[] args)
         {
             DateTime begin = DateTime.Now;
-            readData("input1.txt", out Stoch1);
-            readData("input2.txt", out Stoch2);
+            readMatrixData("input1.txt", out Stoch1);
+            readMatrixData("input2.txt", out Stoch2);
             readMatrixData("input3.txt", out Stoch3);
             Console.WriteLine("Provide the initial index. Dont forget we have zero indexing.");
             indexbegin = Int32.Parse(Console.ReadLine());
@@ -382,7 +382,7 @@ namespace ISAAR.MSolve.SamplesConsole
             stresstoch = new double[montecarlosim - indexbegin];
             for (int index = indexbegin; index < montecarlosim; index++)
             {
-               double lambda = 1650.0 / 150.0;
+               double lambda = 1000.0 / 150.0;
                 double lambdaprev = 1.1*lambda;
                 double maxlambdaofnofailure = 0.0;
                 double thislambdac = lambda;
@@ -428,7 +428,7 @@ namespace ISAAR.MSolve.SamplesConsole
                     }
                     Debug.WriteLine("Previous Lambda {0} Current Lambda {1}", lambdaprev, lambda);
                     hasfailed = false;
-                    SolveStochasticHexaSoil(index, Stoch1[index], Stoch2[index], readMatrixDataPartially(Stoch3, index, index, 0, 7), readMatrixDataPartially(Stoch3, 0, 7, 8, 8), lambda);
+                    SolveStochasticHexaSoil(index, readMatrixDataPartially(Stoch1, index, index, 0, 7), readMatrixDataPartially(Stoch2, index, index, 0, 7), readMatrixDataPartially(Stoch3, index, index, 0, 7), readMatrixDataPartially(Stoch3, 0, 7, 8, 8), lambda);
                     if (hasfailed == true)
                     {
                         previouslambdac = thislambdac;

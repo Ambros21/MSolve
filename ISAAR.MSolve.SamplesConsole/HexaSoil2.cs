@@ -39,7 +39,7 @@ namespace ISAAR.MSolve.SamplesConsole
         public static int kmax = (int)Math.Truncate(hz / LengthZ) + 1;
         public static double qfail=0.0;
         public static double ufail = 0.0;
-        public static void MakeHexaSoil(Model model, double Stoch1, double Stoch2, double[] Stoch3,double[] omega,double lambda)
+        public static void MakeHexaSoil(Model model, double[] Stoch1, double[] Stoch2, double[] Stoch3,double[] omega,double lambda)
         {
             // xreiazetai na rythmizei kaneis ta megethi me auto to configuration
             int nodeID = 1;
@@ -124,13 +124,37 @@ namespace ISAAR.MSolve.SamplesConsole
                         Coord[0] = ActualXi;
                         Coord[1] = ActualPsi;
                         Coord[2] = ActualZeta;
+                        var comp = 0.0;
+                        for (int j = 0; j < gpNo; j++)
+                        {
+                            ActualZeta += help[j] * nodeCoordinates[j, 2];
+                        }
+                        for (int j = 0; j < 8; j = j + 2)
+                        {
+                            comp += Stoch1[j] * Math.Cos(omega[j] * ActualZeta);
+                        }
+                        for (int j = 1; j < 8; j = j + 2)
+                        {
+                            comp += Stoch1[j] * Math.Sin(omega[j] * ActualZeta);
+                        }
+                        comp = Math.Abs((comp) * 0.25 * 0.008686 + 0.008686) / 1;
+                        var csl = 0.0;
+                        for (int j = 0; j < 8; j = j + 2)
+                        {
+                            csl += Stoch2[j] * Math.Cos(omega[j] * ActualZeta);
+                        }
+                        for (int j = 1; j < 8; j = j + 2)
+                        {
+                            csl += Stoch2[j] * Math.Sin(omega[j] * ActualZeta);
+                        }
+                        csl= Math.Abs((csl) * 0.095 * 0.733609251 + 0.733609251) / 1;
                         initialStresses[2] = -gamma * (Htot - gaussPointMaterials[i].Zeta);
                         initialStresses[0] = 0.85 * initialStresses[2];
                         initialStresses[1] = 0.85 * initialStresses[2];
                         initialStresses[3] = 0;
                         initialStresses[4] = 0;
                         initialStresses[5] = 0;
-                        gaussPointMaterials[i] = new KavvadasClays(Stoch1, Stoch2, 1, ksi, initialStresses,Htot,Coord);
+                        gaussPointMaterials[i] = new KavvadasClays(comp, csl, 1, ksi, initialStresses,Htot,Coord);
                     }
                     //elementType1 = new Hexa8(gaussPointMaterials);
                     elementType2 = new Hexa8u8p(gaussPointMaterials);

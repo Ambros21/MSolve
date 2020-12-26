@@ -175,8 +175,10 @@ namespace ISAAR.MSolve.PreProcessor.Materials
                     Stresses[i] = initialStresses[i];
             if (alpha == 1)
             {
-                Kmax = 1*0.008686;
-                Kmin = youngModulus*0.008686;
+                Kmax = youngModulus;
+                Kmin = youngModulus;
+                //Kmax = 1*0.008686;
+                //Kmin = youngModulus*0.008686;
             }
             else
             {
