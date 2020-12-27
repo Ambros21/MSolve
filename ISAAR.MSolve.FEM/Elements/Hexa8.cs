@@ -511,6 +511,13 @@ namespace ISAAR.MSolve.FEM.Elements
         public void SaveMaterialState()
         {
             foreach (IContinuumMaterial3D m in materialsAtGaussPoints) m.SaveState();
+            foreach (IContinuumMaterial3D m in materialsAtGaussPoints)
+            {
+                if (m.hasfailed == true)
+                {
+                    this.hasfailed = true;
+                }
+            }
         }
 
         public void ClearMaterialStresses()

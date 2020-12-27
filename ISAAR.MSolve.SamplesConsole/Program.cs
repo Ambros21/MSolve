@@ -326,7 +326,7 @@ namespace ISAAR.MSolve.SamplesConsole
             var provider = new ProblemStructural(model, solver);
             LibrarySettings.LinearAlgebraProviders = LinearAlgebraProviderChoice.MKL;
 
-            int increments = 10;
+            int increments = 1000;
             var childAnalyzerBuilder = new LoadControlAnalyzer.Builder(model, solver, provider, increments);
             childAnalyzerBuilder.ResidualTolerance = 1E-5;
             childAnalyzerBuilder.MaxIterationsPerIncrement = 100;
@@ -381,23 +381,25 @@ namespace ISAAR.MSolve.SamplesConsole
             dispstoch = new double[montecarlosim - indexbegin];
             dispstoch150 = new double[montecarlosim - indexbegin];
             stresstoch = new double[montecarlosim - indexbegin];
-            for (int index = indexbegin; index < montecarlosim; index++)
-            {
-               double lambda = 1000.0 / 150.0;
-                    hasfailed = false;
-                    SolveStochasticHexaSoil(index, Stoch1[index], Stoch2[index], readMatrixDataPartially(Stoch3, index, index, 0, 7), readMatrixDataPartially(Stoch3, 0, 7, 8, 8), lambda);
-                CollectMonteCarloFailDetails(lambda);
-            }
+            //for (int index = indexbegin; index < montecarlosim; index++)
+            //{
+            //   double lambda = 1000.0 / 150.0;
+            //        hasfailed = false;
+            //        SolveStochasticHexaSoil(index, Stoch1[index], Stoch2[index], readMatrixDataPartially(Stoch3, index, index, 0, 7), readMatrixDataPartially(Stoch3, 0, 7, 8, 8), lambda);
+            //    CollectMonteCarloFailDetails(lambda);
+            //}
             //for (int i = 0; i < 1; i++)
             //{
             //    SolveStochasticHexaSoil(1, Stoch1[1], Stoch2[1]);
             //}
-            //Parallel.For(0, montecarlosim-1,
-            //      index =>
-            //      {
-            //          SolveStochasticHexaSoil(index, Stoch1[index], Stoch2[index], readMatrixDataPartially(Stoch3, index, index, 0, 7), readMatrixDataPartially(Stoch3, 0, 7, 8, 8));
-            //          Console.WriteLine(index);
-            //      });
+            Parallel.For(indexbegin, montecarlosim,
+                  index =>
+                  {
+                      double lambda = 1000.0 / 150.0;
+                      hasfailed = false;
+                      SolveStochasticHexaSoil(index, Stoch1[index], Stoch2[index], readMatrixDataPartially(Stoch3, index, index, 0, 7), readMatrixDataPartially(Stoch3, 0, 7, 8, 8), lambda);
+                      CollectMonteCarloFailDetails(lambda);
+                  });
             DateTime end = DateTime.Now;
             writeTime(begin, end);
             //writeData(dispstoch, 1, "displacements.txt");

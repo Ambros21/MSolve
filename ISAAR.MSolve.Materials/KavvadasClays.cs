@@ -163,7 +163,7 @@ namespace ISAAR.MSolve.PreProcessor.Materials
                 plasticStrain = new double[6];
                 TotalStrain = new double[6];
                 // if alpha=1 this is a stochastic use and we imply youngModulus and poissonRatio for giving the stochastic values.
-                var gamma = 10; //effective stress
+                var gamma = 20; //effective stress
                 this.Htot = Htot;
                 Zeta = -initialStresses[2] / gamma; // the initialization of the stresses should be in the model class HexaSoil2.cs            
                 var Niso = 2.15;//2.08053; //Note that 2*astar is related with the Initial Stresses in X and Y axes (SX=(2*astar-gamma*zeta)/2 for OCR=3)
@@ -190,7 +190,7 @@ namespace ISAAR.MSolve.PreProcessor.Materials
                 PAR[9] = 4;
             QH[2] = 1.627;
             //QH[6] = 0.5 * Math.Exp((Niso - QH[2] - PAR[3] * Math.Log(Math.Abs(s0))) / (PAR[2] - PAR[3]));
-            QH[6] = Math.Min(0.5 * Math.Exp((Niso - QH[2] - PAR[3] * Math.Log(Math.Abs(s0))) / (PAR[2] - PAR[3])),400);
+            QH[6] =Math.Min(0.5 * Math.Exp((Niso - QH[2] - PAR[3] * Math.Log(Math.Abs(s0))) / (PAR[2] - PAR[3])),400);
             //QH[6] = 1000;
             QH[1] = QH[6] * PAR[9]; //no use of OCR
                 PAR[0] = 0;
