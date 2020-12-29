@@ -31,9 +31,9 @@ namespace ISAAR.MSolve.SamplesConsole
         public static double LengthY = 10.0;
         public static double LengthZ = 10.0;
         int nodeID = 1;
-        public static double hx = 80.0;
-        public static double hy = 80.0;
-        public static double hz = 20.0;
+        public static double hx = 160.0;
+        public static double hy = 160.0;
+        public static double hz = 40.0;
         public static int imax = (int)Math.Truncate(hx / LengthX) + 1;
         public static int jmax = (int)Math.Truncate(hy / LengthY) + 1;
         public static int kmax = (int)Math.Truncate(hz / LengthZ) + 1;
