@@ -316,7 +316,7 @@ namespace ISAAR.MSolve.SamplesConsole
             model.SubdomainsDictionary.Add(1, new Subdomain(1));
 
             HexaSoil2.MakeHexaSoil(model, Stoch1, Stoch2, Stoch3, omega,lambda);
-
+           
             model.ConnectDataStructures();
 
             var solverBuilder = new SuiteSparseSolver.Builder();

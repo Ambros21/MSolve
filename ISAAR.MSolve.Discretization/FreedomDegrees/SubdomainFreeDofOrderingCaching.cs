@@ -72,10 +72,11 @@ namespace ISAAR.MSolve.Discretization.FreedomDegrees
             }
             (int[] permutation, bool oldToNew) = reorderingAlgorithm.FindPermutation(pattern);
             //for (int i = 0; i < permutation.Length; i++)
-            //{
-            //    Console.Write(i.ToString() + " ");
-            //    Console.WriteLine(permutation[i]);
-            //}
+          //  {
+           //     Console.Write(i.ToString() + " ");
+          //      Console.WriteLine(permutation[i]);
+          //  }
+          //  var hh2=Array.IndexOf(permutation, 5954);
             FreeDofs.Reorder(permutation, oldToNew);
         }
 

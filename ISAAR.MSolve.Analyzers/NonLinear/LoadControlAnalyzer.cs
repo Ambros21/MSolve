@@ -85,7 +85,7 @@ namespace ISAAR.MSolve.Analyzers.NonLinear
                     SaveMaterialStateAndUpdateSolution();
                     if (model.Subdomains[0].hasfailed == true)
                     {
-                        dispfail = uPlusdu[1][2022];
+                        dispfail = uPlusdu[1][6601];
                         failstep = increment;
                     }
                 }
