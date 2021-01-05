@@ -380,63 +380,64 @@ namespace ISAAR.MSolve.SamplesConsole
             dispstoch = new double[montecarlosim - indexbegin];
             dispstoch150 = new double[montecarlosim - indexbegin];
             stresstoch = new double[montecarlosim - indexbegin];
-            for (int index = indexbegin; index < montecarlosim; index++)
-            {
-               double lambda = 1000.0 / 150.0;
-                double lambdaprev = 1.1*lambda;
-                double maxlambdaofnofailure = 0.0;
-                double thislambdac = lambda;
-                double previouslambdac = 0.0;
-                bool isfirstiter = true;
-                hasfailed = false;
-                while (!(hasfailed == true && Math.Abs((thislambdac - previouslambdac) / thislambdac)<0.01))
-                {
-                    if (hasfailed == true)
-                    {
-                        lambdaprev = lambda;
-                        if (maxlambdaofnofailure == 0)
-                        {
-                            lambda = 0.5 * (lambda * stepoffail / 1000.0 + lambdaprev);
-                        }
-                        else
-                        {
-                            lambda = 0.5 * (maxlambdaofnofailure + lambdaprev);
-                        }
-                    }
-                    else
-                    {
-                        if (isfirstiter)
-                        {
-                            isfirstiter = false;
-                        }
-                        else
-                        {
-                            if (maxlambdaofnofailure != 0 && maxlambdaofnofailure < lambda)
-                            {
-                                maxlambdaofnofailure = lambda;
-                            }
-                            if (maxlambdaofnofailure == 0)                             
-                            {
-                                maxlambdaofnofailure = lambda;
-                                lambda = 0.5 * (lambda + lambdaprev);
-                            }
-                            else
-                            {
-                                lambda = 0.5 * (maxlambdaofnofailure + lambdaprev);
-                            }
-                        }
-                    }
-                    Debug.WriteLine("Previous Lambda {0} Current Lambda {1}", lambdaprev, lambda);
-                    hasfailed = false;
-                    SolveStochasticHexaSoil(index, readMatrixDataPartially(Stoch1, index, index, 0, 7), readMatrixDataPartially(Stoch2, index, index, 0, 7), readMatrixDataPartially(Stoch3, index, index, 0, 7), readMatrixDataPartially(Stoch3, 0, 7, 8, 8), lambda);
-                    if (hasfailed == true)
-                    {
-                        previouslambdac = thislambdac;
-                        thislambdac = lambdaprev;
-                    }
-                }
-                CollectMonteCarloFailDetails(lambda);
-            }
+            Parallel.For(indexbegin, montecarlosim,
+                  index =>
+                  {
+                      double lambda = 1000.0 / 150.0;
+                      double lambdaprev = 1.1 * lambda;
+                      double maxlambdaofnofailure = 0.0;
+                      double thislambdac = lambda;
+                      double previouslambdac = 0.0;
+                      bool isfirstiter = true;
+                      hasfailed = false;
+                      while (!(hasfailed == true && Math.Abs((thislambdac - previouslambdac) / thislambdac) < 0.01))
+                      {
+                          if (hasfailed == true)
+                          {
+                              lambdaprev = lambda;
+                              if (maxlambdaofnofailure == 0)
+                              {
+                                  lambda = 0.5 * (lambda * stepoffail / 1000.0 + lambdaprev);
+                              }
+                              else
+                              {
+                                  lambda = 0.5 * (maxlambdaofnofailure + lambdaprev);
+                              }
+                          }
+                          else
+                          {
+                              if (isfirstiter)
+                              {
+                                  isfirstiter = false;
+                              }
+                              else
+                              {
+                                  if (maxlambdaofnofailure != 0 && maxlambdaofnofailure < lambda)
+                                  {
+                                      maxlambdaofnofailure = lambda;
+                                  }
+                                  if (maxlambdaofnofailure == 0)
+                                  {
+                                      maxlambdaofnofailure = lambda;
+                                      lambda = 0.5 * (lambda + lambdaprev);
+                                  }
+                                  else
+                                  {
+                                      lambda = 0.5 * (maxlambdaofnofailure + lambdaprev);
+                                  }
+                              }
+                          }
+                          Debug.WriteLine("Previous Lambda {0} Current Lambda {1}", lambdaprev, lambda);
+                          hasfailed = false;
+                          SolveStochasticHexaSoil(index, readMatrixDataPartially(Stoch1, index, index, 0, 7), readMatrixDataPartially(Stoch2, index, index, 0, 7), readMatrixDataPartially(Stoch3, index, index, 0, 7), readMatrixDataPartially(Stoch3, 0, 7, 8, 8), lambda);
+                          if (hasfailed == true)
+                          {
+                              previouslambdac = thislambdac;
+                              thislambdac = lambdaprev;
+                          }
+                      }
+                      CollectMonteCarloFailDetails(lambda);
+                  });
             //for (int i = 0; i < 1; i++)
             //{
             //    SolveStochasticHexaSoil(1, Stoch1[1], Stoch2[1]);
