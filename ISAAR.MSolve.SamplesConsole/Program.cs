@@ -337,7 +337,7 @@ namespace ISAAR.MSolve.SamplesConsole
            
             parentAnalyzer.Initialize();
             parentAnalyzer.Solve();
-            int monitorDof = HexaSoil2.ProvideIdMonitor(model);
+            //int monitorDof = HexaSoil2.ProvideIdMonitor(model);
             Node nn = model.NodesDictionary[203];
             var hhhh = model.GlobalDofOrdering.GlobalFreeDofs[nn, StructuralDof.TranslationZ];
             if (model.Subdomains[0].hasfailed==true)

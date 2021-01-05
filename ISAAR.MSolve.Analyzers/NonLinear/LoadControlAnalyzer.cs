@@ -82,7 +82,7 @@ namespace ISAAR.MSolve.Analyzers.NonLinear
                 SaveMaterialStateAndUpdateSolution();
                 if (model.Subdomains[0].hasfailed == true)
                 {
-                    dispfail = uPlusdu[1][722];
+                    dispfail = uPlusdu[1][9246];
                 }
             }
             CopySolutionToSubdomains();
