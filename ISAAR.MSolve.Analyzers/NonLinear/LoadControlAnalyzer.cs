@@ -78,7 +78,7 @@ namespace ISAAR.MSolve.Analyzers.NonLinear
                 }
                 //double rhsNormInc = solver.LinearSystems.First().Value.RhsVector.Norm2();
                 //double xNormInc = solver.LinearSystems.First().Value.Solution.Norm2();
-                Debug.WriteLine("NR {0}, first error: {1}, exit error: {2}", iteration, firstError, errorNorm);
+               // Debug.WriteLine("NR {0}, first error: {1}, exit error: {2}", iteration, firstError, errorNorm);
                 SaveMaterialStateAndUpdateSolution();
                 if (model.Subdomains[0].hasfailed == true)
                 {

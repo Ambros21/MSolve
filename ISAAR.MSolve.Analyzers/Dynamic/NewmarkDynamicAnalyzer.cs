@@ -189,7 +189,7 @@ namespace ISAAR.MSolve.Analyzers.Dynamic
             {
                 if (model.Subdomains[0].hasfailed == false)
                 {
-                    Debug.WriteLine("Newmark step: {0}", i);
+                    //Debug.WriteLine("Newmark step: {0}", i);
 
                     IDictionary<int, IVector> rhsVectors = provider.GetRhsFromHistoryLoad(i);
                     foreach (var l in linearSystems.Values) l.RhsVector = rhsVectors[l.Subdomain.ID];

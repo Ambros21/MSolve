@@ -383,7 +383,7 @@ namespace ISAAR.MSolve.SamplesConsole
             Parallel.For(indexbegin, montecarlosim,
                   index =>
                   {
-                      double lambda = 1000.0 / 150.0;
+                      double lambda = 800.0 / 150.0;
                       double lambdaprev = 1.1 * lambda;
                       double maxlambdaofnofailure = 0.0;
                       double thislambdac = lambda;
