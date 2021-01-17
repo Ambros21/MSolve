@@ -76,6 +76,7 @@ namespace ISAAR.MSolve.Discretization.FreedomDegrees
             //    Console.Write(i.ToString() + " ");
             //    Console.WriteLine(permutation[i]);
             //}
+            //var hh2 = Array.IndexOf(permutation, 8379);
             FreeDofs.Reorder(permutation, oldToNew);
         }
 

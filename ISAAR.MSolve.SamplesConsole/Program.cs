@@ -316,7 +316,7 @@ namespace ISAAR.MSolve.SamplesConsole
             model.SubdomainsDictionary.Add(1, new Subdomain(1));
 
             HexaSoil2.MakeHexaSoil(model, Stoch1, Stoch2, Stoch3, omega,lambda);
-
+            int monitorDof = HexaSoil2.ProvideIdMonitor(model);
             model.ConnectDataStructures();
 
             var solverBuilder = new SuiteSparseSolver.Builder();
@@ -337,7 +337,7 @@ namespace ISAAR.MSolve.SamplesConsole
            
             parentAnalyzer.Initialize();
             parentAnalyzer.Solve();
-            int monitorDof = HexaSoil2.ProvideIdMonitor(model);
+            //int monitorDof = HexaSoil2.ProvideIdMonitor(model);
             //Node nn = model.NodesDictionary[203];
             //var hhhh = model.GlobalDofOrdering.GlobalFreeDofs[nn, StructuralDof.TranslationZ];
             if (model.Subdomains[0].hasfailed==true)
@@ -383,7 +383,7 @@ namespace ISAAR.MSolve.SamplesConsole
             Parallel.For(indexbegin, montecarlosim,
                   index =>
                   {
-                      double lambda = 1650.0 / 150.0;
+                      double lambda = 550.0 / 150.0;
                       double lambdaprev = 1.1 * lambda;
                       double maxlambdaofnofailure = 0.0;
                       double thislambdac = lambda;
