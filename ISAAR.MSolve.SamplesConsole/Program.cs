@@ -380,10 +380,9 @@ namespace ISAAR.MSolve.SamplesConsole
             dispstoch = new double[montecarlosim - indexbegin];
             dispstoch150 = new double[montecarlosim - indexbegin];
             stresstoch = new double[montecarlosim - indexbegin];
-            Parallel.For(indexbegin, montecarlosim,
-                  index =>
-                  {
-                      double lambda = 550.0 / 150.0;
+            for (int index=indexbegin;index<montecarlosim;index++)
+                 {
+                      double lambda = 400.0 / 150.0;
                       double lambdaprev = 1.1 * lambda;
                       double maxlambdaofnofailure = 0.0;
                       double thislambdac = lambda;
@@ -437,7 +436,7 @@ namespace ISAAR.MSolve.SamplesConsole
                           }
                       }
                       CollectMonteCarloFailDetails(lambda);
-                  });
+                  };
             //for (int i = 0; i < 1; i++)
             //{
             //    SolveStochasticHexaSoil(1, Stoch1[1], Stoch2[1]);
