@@ -7,6 +7,7 @@ using ISAAR.MSolve.LinearAlgebra.Providers;
 using ISAAR.MSolve.LinearAlgebra.Reduction;
 using ISAAR.MSolve.LinearAlgebra.Vectors;
 using static ISAAR.MSolve.LinearAlgebra.LibrarySettings;
+using ISAAR.MSolve.LinearAlgebra.Providers.MKL;
 
 //TODO: Should this be removed? I need it to provide analyzers with a matrix.
 namespace ISAAR.MSolve.LinearAlgebra.Matrices
@@ -408,16 +409,29 @@ namespace ISAAR.MSolve.LinearAlgebra.Matrices
         //public IVector Multiply(IVectorView vector, bool transposeThis = false)
         //    => DenseStrategies.Multiply(this, vector, transposeThis);
         public IVector Multiply(IVectorView vector, bool transposeThis = false)
-        { 
+        {
             IVector result = Vector.CreateFromArray(new double[vector.Length], false);
+            double[] temp3 = vector.CopyToArray();
+            double[] temp4 = new double[vector.Length];
+            double[] temp5 = new double[vector.Length];
             IVector temp1 = Vector.CreateFromArray(new double[vector.Length], false);
-            IVector temp2= Vector.CreateFromArray(new double[vector.Length], false);
-            CscMultiplications.CscTimesVector(this.NumColumns, values, colOffsets, rowIndices, vector,result);
-            CscMultiplications.CscTransTimesVector(this.NumColumns, values, colOffsets, rowIndices, vector, temp1);
-            result.AddIntoThis(temp1);
-            CscMultiplications.CscDiagonalTimesVector(this.NumColumns, values, colOffsets, rowIndices, vector, temp2);
-            result.LinearCombinationIntoThis(1.0, temp2, -1.0);
-            return result;
+            IVector temp2 = Vector.CreateFromArray(new double[vector.Length], false);
+            MklSparseBlasProvider.UniqueInstance.Dcscgemv(false, NumRows, NumColumns, this.values, this.colOffsets, this.rowIndices, temp3, 0, temp4, 0);
+            MklSparseBlasProvider.UniqueInstance.Dcscgemv(true, NumRows, NumColumns, this.values, this.colOffsets, this.rowIndices, temp3, 0, temp5, 0);
+            IVector diag = this.GetDiagonal();
+            diag.MultiplyEntrywiseIntoThis(vector);
+            IVector tempp4 = Vector.CreateFromArray(temp4, true);
+            IVector tempp5 = Vector.CreateFromArray(temp5, true);
+            tempp5.LinearCombinationIntoThis(1.0, tempp4, 1.0);
+            tempp5.LinearCombinationIntoThis(1.0, diag, -1.0);
+            //CscMultiplications.CscTimesVector(this.NumColumns, values, colOffsets, rowIndices, vector,result);
+            //CscMultiplications.CscTransTimesVector(this.NumColumns, values, colOffsets, rowIndices, vector, temp1);
+            //result.AddIntoThis(temp1);
+            //CscMultiplications.CscDiagonalTimesVector(this.NumColumns, values, colOffsets, rowIndices, vector, temp2);
+            //result.LinearCombinationIntoThis(1.0, temp2, -1.0);
+            //IVector result3 = result.Subtract(tempp5);
+            //var hhhh = result3.MaxAbsolute();
+            return tempp5;
         }
 
         /// <summary>
