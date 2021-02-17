@@ -283,9 +283,9 @@ namespace ISAAR.MSolve.PreProcessor.Materials
             help[0] = (Stresses[0] + Stresses[1] + Stresses[2]) / 3;
             help[1] = (2 * Stresses[1] - Stresses[0] - Stresses[2]) / Math.Sqrt(6);
             help[2] = (Stresses[2] - Stresses[0]) / Math.Sqrt(2);
-            help[3] = (Stresses[3]) / Math.Sqrt(2);
-            help[4] = (Stresses[4]) / Math.Sqrt(2);
-            help[5] = (Stresses[5]) / Math.Sqrt(2);
+            help[3] = (Stresses[3]) * Math.Sqrt(2);
+            help[4] = (Stresses[4]) * Math.Sqrt(2);
+            help[5] = (Stresses[5]) * Math.Sqrt(2);
             Stresses = help;
             return Stresses;
         }
@@ -295,9 +295,9 @@ namespace ISAAR.MSolve.PreProcessor.Materials
             help[0] = Stresses[0] - Stresses[1] / Math.Sqrt(6) - Stresses[2] / Math.Sqrt(2);
             help[1] = Stresses[0] + 2 * Stresses[1] / Math.Sqrt(6);
             help[2] = Stresses[0] - Stresses[1] / Math.Sqrt(6) + Stresses[2] / Math.Sqrt(2);
-            help[3] = (Stresses[3]) * Math.Sqrt(2);
-            help[4] = (Stresses[4]) * Math.Sqrt(2);
-            help[5] = (Stresses[5]) * Math.Sqrt(2);
+            help[3] = (Stresses[3]) / Math.Sqrt(2);
+            help[4] = (Stresses[4]) / Math.Sqrt(2);
+            help[5] = (Stresses[5]) / Math.Sqrt(2);
             Stresses = help;
             //Transform at the end to the engineering convention
             for (int i = 0; i < 6; i++)
